@@ -202,21 +202,29 @@ esac
 echo
 
 if [[ $MAKECHANGES -eq $Yes ]]; then
-	if [[ $TURNOFFBACKUPS -eq $No ]]; then
-		#Create Directory for backups
-		BACKUPFOLDER=$(mktemp -d)
-		#Create file to store commands to undo changes
-		UNDOCOMMANDFILE="undocommands.lis"
-		#Prime the file 
-		echo "#!/bin/bash" > $BACKUPFOLDER/$UNDOCOMMANDFILE
-	fi #TURNOFFBACKUPS check 
 
 	#Create Directory for Commands that should be run
 	PRESCRIBEFOLDER=$(mktemp -d)
+	
 	#Create file to store commands that should be run
 	PRESCRIBECOMMANDFILE="commandstorun.lis"
+	
 	#Prime the file 
 	echo "#!/bin/bash" > $PRESCRIBEFOLDER/$PRESCRIBECOMMANDFILE
+
+	#Create Directory for Undo File
+	UNDOFOLDER=$(mktemp -d)
+	
+	#Create file to store commands to undo changes
+	UNDOCOMMANDFILE="undocommands.lis"
+	
+	#Prime the undo file 
+	echo "#!/bin/bash" > $UNDOFOLDER/$UNDOCOMMANDFILE
+	
+	if [[ $TURNOFFBACKUPS -eq $No ]]; then
+		#Add the BACKUPFOLDER to the PRESCRIBECOMMANDFILE
+		echo "BACKUPFOLDER=\$(mktemp -d)" > $PRESCRIBEFOLDER/$PRESCRIBECOMMANDFILE
+	fi #TURNOFFBACKUPS check 
 fi #MAKECHANGES Check
 
 #Create a file to white list certain checks on hosts.
@@ -227,14 +235,21 @@ fi #MAKECHANGES Check
 execute_command_function () {
 	CommandToExecute=$1
 	CommandToUndo=$2
+	CommandToCleanUpBackups=$3
 	
 	#Add the Command to Execute to the "Prescibe Commands, at the end we decide if we should run these or not
 	echo "$CommandToExecute" >> $PRESCRIBEFOLDER/$PRESCRIBECOMMANDFILE
 	
-	#Add the command to undo change
-	if [[ $TURNOFFBACKUPS -eq $No ]]; then
-		echo "$CommandToUndo" >> $BACKUPFOLDER/$UNDOCOMMANDFILE
+	#Add the command to undo change as long as it is populated 
+	if [[ -n "${CommandToUndo}"]]; then
+		echo "$CommandToUndo" >> $UNDOFOLDER/$UNDOCOMMANDFILE
 	fi 
+	
+	#Backup the existing Config as long as backups are turned on and a backup was produced 
+	if [[ $TURNOFFBACKUPS -eq $No && -n "${CommandToCleanUpBackups}"]]; then
+		echo "$CommandToCleanUpBackups" >> $PRESCRIBEFOLDER/$PRESCRIBECOMMANDFILE
+	fi
+	
 } 
 
 interactive_check_function () {
@@ -458,7 +473,7 @@ do
 				
 				if [[ $MAKETHISCHANGE -eq $Yes ]]; then
 					if [[ $TURNOFFBACKUPS -eq $No ]]; then
-						#Generate a backup hash
+						#Generate a backup hash unique to each check
 						BACKUPEXTENTION="$(date +"%m-%d-%Y-%k:%M:%S:%N")$option"
 					else 
 						BACKUPEXTENTION=""
@@ -467,37 +482,31 @@ do
 					#Modify the current setting or add it
 					if [[ "$currentsetting" != "" ]]; then
 						#Correct the existing value for the option
-						sudo sed -i$BACKUPEXTENTION "/^$option/s/$separator$currentsetting/$separator$value/gi" $filename
+						##sudo sed -i$BACKUPEXTENTION "/^$option/s/$separator$currentsetting/$separator$value/gi" $filename
+						execute_command_function "sudo sed -i$BACKUPEXTENTION "/^$option/s/$separator$currentsetting/$separator$value/gi" $filename" "sudo sed -i "/^$option/s/$separator$value/$separator$currentsetting/gi" $filename" "sudo mv $filename$BACKUPEXTENTION \$BACKUPFOLDER"
 						echo_text_function "$ModificationText Changing existing entry - $option$separator$value in $filename"
 					else #current setting blank check else
 						#Append the Option and Value to the conf file with the correct separator
-						sudo sed -i$BACKUPEXTENTION "\$a$option$separator$value" $filename
+						##sudo sed -i$BACKUPEXTENTION "\$a$option$separator$value" $filename
+						execute_command_function "sudo sed -i$BACKUPEXTENTION "\$a$option$separator$value" $filename" "sudo sed '/^$a$option$separator$value/d' $filename" "sudo mv $filename$BACKUPEXTENTION \$BACKUPFOLDER"
 						echo_text_function "$ModificationText Adding new entry - $option$separator$value to $filename"
-						
-					fi #End current setting check
-					if [[ $TURNOFFBACKUPS -eq $No ]]; then
-						#Get the backup
-						sudo mv $filename$BACKUPEXTENTION $BACKUPFOLDER
-					fi
+					fi #current setting blank check else
 					
-					if [[ $command_to_set_active_value != "none" ]]; then #If there is a need and way to set an active value, do it here
-						#Set active value
-						sudo $command_to_set_active_value $flag_to_set_active_value $option$separator$value > /dev/null
-						if [[ $TURNOFFBACKUPS -eq $No ]]; then
-							#Add the command to undo change
-							echo "sudo $command_to_set_active_value $flag_to_set_active_value $option$separator$currentsetting" >> $BACKUPFOLDER/$UNDOCOMMANDFILE
-						fi 
-						echo_text_function "$ModificationText Making the new $option value active by running $command_to_set_active_value $flag_to_set_active_value $option$separator$value"
-					fi #active value command check
+					
+					#if [[ $command_to_set_active_value != "none" ]]; then #If there is a need and way to set an active value, do it here
+					#	#Set active value
+					#	sudo $command_to_set_active_value $flag_to_set_active_value $option$separator$value > /dev/null
+					#	if [[ $TURNOFFBACKUPS -eq $No ]]; then
+					#		#Add the command to undo change
+					#		echo "sudo $command_to_set_active_value $flag_to_set_active_value $option$separator$currentsetting" >> $BACKUPFOLDER/$UNDOCOMMANDFILE
+					#	fi 
+					#	echo_text_function "$ModificationText Making the new $option value active by running $command_to_set_active_value $flag_to_set_active_value $option$separator$value"
+					#fi #active value command check
 					
 					if [[ "$servive_to_reload" != "none" ]]; then
 						#reload the appropriate service 
-						sudo service $servive_to_reload reload > /dev/null
+						execute_command_function "sudo service $servive_to_reload reload > /dev/null" "sudo service $servive_to_reload reload > /dev/null" ""
 						echo_text_function "$ModificationText Reloaded the $servive_to_reload service" 
-						if [[ $TURNOFFBACKUPS -eq $No ]]; then
-							#Add the command to undo change
-							echo "sudo service $servive_to_reload reload" >> $BACKUPFOLDER/$UNDOCOMMANDFILE
-						fi
 					fi #servive_to_reload
 				else #MAKETHISCHANGE
 					echo_text_function "$SkippedText $option left set to $value in $filename"
@@ -515,9 +524,14 @@ do
 	fi #File Existance check 
 done
 
-
 if [[ $MAKECHANGES -eq $Yes ]]; then
 	echo
+	
+	#Backups
+	if [[ $TURNOFFBACKUPS -eq $No ]]; then
+		#We made backups so we need to deal with them
+		echo "BACKUPFOLDER used is \$BACKUPFOLDER" > $PRESCRIBEFOLDER/$PRESCRIBECOMMANDFILE
+	fi #TURNOFFBACKUPS check 
 	
 	#Check to see if we are actually suppose to run the commands 
 	if [[ $PRESCRIBECOMMANDSONLY -eq $No ]]; then
@@ -536,16 +550,11 @@ if [[ $MAKECHANGES -eq $Yes ]]; then
 	echo_text_function "Compressed the Prescribed commands to $PRESCRIBEFOLDER.tar.gz"
 	echo
 	
-	#Backups
-	if [[ $TURNOFFBACKUPS -eq $No ]]; then
-		#We made backups so we need to deal with them
-		echo_text_function "Here are the commands to undo the changes if you made them:"
-		sudo cat $BACKUPFOLDER/$UNDOCOMMANDFILE
-		echo
-		#Compress the files
-		sudo tar -zcf $BACKUPFOLDER.tar.gz $BACKUPFOLDER > /dev/null 2>&1
-		echo_text_function "Backups of files that were changed and commands to undo changes are available in $BACKUPFOLDER.tar.gz"
-	fi #TURNOFFBACKUPS check 
+	#Undos
+	echo_text_function "Here are the commands to undo the changes if you made them:"
+	sudo cat $UNDOFOLDER/$UNDOCOMMANDFILE
+	sudo tar -zcf $UNDOFOLDER.tar.gz $UNDOFOLDER > /dev/null 2>&1
+	echo_text_function "Commands to undo changes are available in $UNDOFOLDER.tar.gz"
 	
 fi #MAKECHANGES check 
 
