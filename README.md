@@ -180,7 +180,7 @@ To Dos:
 
 -- Add check for updates - #"yum check-update"
 
--- Package Checking - just run rpm once and store output in variable 
+-- Package Checking - just run rpm once and store output in variable
 
 -- Add a way to check for packages that should NOT be installed - combine with exisitng check 
 
