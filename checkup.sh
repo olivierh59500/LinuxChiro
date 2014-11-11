@@ -241,12 +241,12 @@ execute_command_function () {
 	echo "$CommandToExecute" >> $PRESCRIBEFOLDER/$PRESCRIBECOMMANDFILE
 	
 	#Add the command to undo change as long as it is populated 
-	if [[ -n "${CommandToUndo}"]]; then
+	if [[ -n "${CommandToUndo}" ]]; then
 		echo "$CommandToUndo" >> $UNDOFOLDER/$UNDOCOMMANDFILE
 	fi 
 	
 	#Backup the existing Config as long as backups are turned on and a backup was produced 
-	if [[ $TURNOFFBACKUPS -eq $No && -n "${CommandToCleanUpBackups}"]]; then
+	if [[ $TURNOFFBACKUPS -eq $No && -n "${CommandToCleanUpBackups}" ]]; then
 		echo "$CommandToCleanUpBackups" >> $PRESCRIBEFOLDER/$PRESCRIBECOMMANDFILE
 	fi
 	
@@ -482,13 +482,11 @@ do
 					#Modify the current setting or add it
 					if [[ "$currentsetting" != "" ]]; then
 						#Correct the existing value for the option
-						##sudo sed -i$BACKUPEXTENTION "/^$option/s/$separator$currentsetting/$separator$value/gi" $filename
-						execute_command_function "sudo sed -i$BACKUPEXTENTION "/^$option/s/$separator$currentsetting/$separator$value/gi" $filename" "sudo sed -i "/^$option/s/$separator$value/$separator$currentsetting/gi" $filename" "sudo mv $filename$BACKUPEXTENTION \$BACKUPFOLDER"
+						execute_command_function "sudo sed -i$BACKUPEXTENTION '/^$option/s/$separator$currentsetting/$separator$value/gi' $filename" "sudo sed -i '/^$option/s/$separator$value/$separator$currentsetting/gi' $filename" "sudo mv $filename$BACKUPEXTENTION \$BACKUPFOLDER"
 						echo_text_function "$ModificationText Changing existing entry - $option$separator$value in $filename"
 					else #current setting blank check else
 						#Append the Option and Value to the conf file with the correct separator
-						##sudo sed -i$BACKUPEXTENTION "\$a$option$separator$value" $filename
-						execute_command_function "sudo sed -i$BACKUPEXTENTION "\$a$option$separator$value" $filename" "sudo sed '/^$a$option$separator$value/d' $filename" "sudo mv $filename$BACKUPEXTENTION \$BACKUPFOLDER"
+						execute_command_function "sudo sed -i$BACKUPEXTENTION '\$a$option$separator$value' $filename" "sudo sed '/^$option$separator$value/d' $filename" "sudo mv $filename$BACKUPEXTENTION \$BACKUPFOLDER"
 						echo_text_function "$ModificationText Adding new entry - $option$separator$value to $filename"
 					fi #current setting blank check else
 					
@@ -530,7 +528,7 @@ if [[ $MAKECHANGES -eq $Yes ]]; then
 	#Backups
 	if [[ $TURNOFFBACKUPS -eq $No ]]; then
 		#We made backups so we need to deal with them
-		echo "BACKUPFOLDER used is \$BACKUPFOLDER" > $PRESCRIBEFOLDER/$PRESCRIBECOMMANDFILE
+		echo "echo BACKUPFOLDER used is \$BACKUPFOLDER" >> $PRESCRIBEFOLDER/$PRESCRIBECOMMANDFILE
 	fi #TURNOFFBACKUPS check 
 	
 	#Check to see if we are actually suppose to run the commands 
