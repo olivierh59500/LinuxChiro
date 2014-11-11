@@ -34,8 +34,9 @@ Current Limitations:
 
 Requirements:
 - Runs on RHEL/Centos 5/6 (RHEL7 mostly works, the big difference between versions is the checks to perform)
-- Sudo privs without password
-- /sbin in path
+- Sudo privs without password (This can be trimmed down) 
+- /sbin in path (This can be trimmed down, the code will check for each needed commend but things like /sbin/service are needed)
+- Bash GNU bash, version 3.2.25 or later
 
 Major Feature additions in the works:
 - Ability to optionally source checks from external config files.
