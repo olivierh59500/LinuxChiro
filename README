@@ -217,5 +217,9 @@ To Dos:
  - Add option to config file 
  - Restarting of service
  - Setting of Active Value 
+ - Service running that should be 
+ - Servive running that should not be (and does exist) 
+ - Servive running that should not be (and does not exist) 
+ - Service not running that should not be running
  - Undoing all of the above 
 
