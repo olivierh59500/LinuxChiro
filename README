@@ -158,6 +158,8 @@ To Dos:
 
 -- Put a catch all "else" in every if/case statement and custom error
 
+-- Create Files for CIS and NSA compliance 
+
 -- Get arugments working via pipe (important for massh usage). Might be tough, may have to rename script and check $0
 
 -- Get rid of all the exit code status checks in the if statements, put the greps right in the If block 
