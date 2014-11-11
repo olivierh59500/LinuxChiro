@@ -23,7 +23,6 @@ Other features:
 - Changes are made immediately active when possible and added to the appropriate files for the next service (ex sshd) restart 
 - Descriptive/Custom exit codes
 - Provides brief/simple reasons for making each change
-- Runs on RHEL/Centos 5/6 (RHEL7 mostly works, the big difference between versions is the checks to perform) 
 - All contained in one bash script 
 
 Current Limitations:
@@ -33,7 +32,12 @@ Current Limitations:
 - It can't deal with multiple occurrences of an option/values in a file (ex: two name servers in /etc/resolve.conf). It warns and acts on the value of the 2nd occurrence, which may cause issues.  
 - It can't deal with min/max values. It only takes exact - ex PASS_MAX_DAYS in /etc/login.defs
 
-Major Feature additions in the works 
+Requirements:
+- Runs on RHEL/Centos 5/6 (RHEL7 mostly works, the big difference between versions is the checks to perform)
+- Sudo privs without password
+- /sbin in path
+
+Major Feature additions in the works:
 - Ability to optionally source checks from external config files.
 - RPM Package checks
 - Ability to create and process a white list of changes that should not be made on a host 
@@ -178,6 +182,7 @@ To Dos:
  - Check on/off notification output
  - Undoing all of the above 
  - Interactive Changes 
+ - Test on different versions of RedHat/Centos
 
 -- Etc:
 -- Create Files for CIS and NIST compliance 
