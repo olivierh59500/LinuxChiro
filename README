@@ -3,25 +3,17 @@ LinuxChiro
 
 Posture checking and correcting for Linux
 
-What it checks:
- - Any specified files/folders for permissions or ownership
- - It also checks config filed for correct option/value 
+What it checks/fixes:
+ - Files/folders for permissions and/or ownership
+ - OS services for running and installed status
+ - Config files for correct option/value setting (separator can be specified)
    - Ex: "PermitEmptyPasswords no" in sshd_config or "net.ipv4.tcp_syncookies = 1" in /etc/sysctl.conf
- - The following config files have working examples
-    - /etc/sysctl.conf
-    - /etc/ssh/ssh_config
-    - /etc/ssh/sshd_config
-    - /etc/resolv.conf
-    - /etc/login.defs
-    - /etc/sysconfig/init
-    - /etc/pam.d/system-auth
 
 Core functionality:
-- Examining  - Audit things to be fixed, things already fixed or the status of all 
-- Prescribing - Produces a list of what commands that can be run to resolve issues
-- Perform adjustments - Fix issues interactively (locally) and non-interactively (locally/remotely) 
-- Insurance - Backs up things before making each change
-- Easily revert - Creates a list of commands to run to easily undo changes 
+- Examination  - Audit things to be fixed, things already fixed or the status of all 
+- Prescription - Produces a list of what commands that should be run to resolve issues
+- Adjustment   - Fix issues interactively (locally) and non-interactively (locally/remotely) 
+- Insurance    - Backs up things before making each change and creates a list of commands to run to easily undo changes
 
 Other features:
 - Runs remotely via a pipe (it won't take arguments when run remotely but you can hard code the option) 
@@ -30,20 +22,28 @@ Other features:
 - Checks for the availability of required commands before running 
 - Changes are made immediately active and added to the appropriate files for the next service (ex sshd) restart 
 - Descriptive/Custom exit codes for each unique exit situation
-- Provides brief/simple reasons for making each change, ability to improve on this
-- Runs on RHEL/Centos 6 (Rhel 5 mostly works - RHEL7 support soon) 
+- Provides brief/simple reasons for making each change
+- Runs on RHEL/Centos 5/6 (RHEL7 mostly works, the big difference between versions is the checks to perform) 
 
-Limitations:
+Current Limitations:
 - Currently it will not create files that don't exist but should - it will only warn you in this situation. 
   - It will add options/values that don't exist in a (existing) config file
 - Currently it will not delete options or files that should not exist. 
-  - This isn't a big deal because we can usually just set them to an appropriate value but some things need to be removed. 
+  - This isn't a big deal because we can usually just set them to an appropriate value (ex null) but some things need to be removed. 
 
 Major Feature additions in the works 
 - Ability to load checks from separate config files
-- Package and Service checks
+- Package checks
 - Custom white lists per hosts for decentralized management of hosts. 
 
+ - The following config files have working examples
+    - /etc/sysctl.conf
+    - /etc/ssh/ssh_config
+    - /etc/ssh/sshd_config
+    - /etc/resolv.conf
+    - /etc/login.defs
+    - /etc/sysconfig/init
+    - /etc/pam.d/system-auth
 
 Usage and Example:
 
