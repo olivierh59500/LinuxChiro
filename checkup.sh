@@ -40,7 +40,7 @@ echo_text_function () {
 	TYPEOFNOTIFICATION=$2
 	
 	#Rather than checking the notification setting for each echo, we centralize it here and default to echoing
-	case "TYPEOFNOTIFICATION" in
+	case "$TYPEOFNOTIFICATION" in
 	ON)
 		if [[ $ONNOTIFICATIONS -eq $Yes ]]; then
 			echo "$TextToEcho"
@@ -279,7 +279,7 @@ interactive_check_function () {
 			case $yn in
 				[Yy]* ) MAKETHISCHANGE=$Yes; break;;
 				[Nn]* ) MAKETHISCHANGE=$No; break;;
-				* ) echo "Please answer yes or no.";;
+				* ) echo 'Please answer "y" or "n".';;
 			esac
 		done
 	else
