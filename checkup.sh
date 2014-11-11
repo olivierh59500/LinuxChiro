@@ -61,25 +61,7 @@ echo_text_function () {
 #Command Check - "echo" is the only command we assume exists because we use it for the Command check announcement, it would be nice to run this through the echo_text_function at some point
 #format
 #command
-commands_needed_array=(
-echo
-chmod
-chown
-grep
-sed
-service
-stat
-rpm
-yum
-awk
-tail
-sysctl
-mktemp
-tar
-sudo
-mv
-date
-)
+commands_needed_array=(echo chmod chown grep sed service stat rpm yum awk tail sysctl mktemp tar sudo mv date)
 
 for command in ${commands_needed_array[@]}
 do
