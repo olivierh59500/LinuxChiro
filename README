@@ -47,18 +47,18 @@ Major Feature additions in the works
 
 Usage and Example:
 
-[autobot@server ~]$ git clone https://github.com/johnculkin/LinuxChiro.git
+[user@server ~]$ git clone https://github.com/johnculkin/LinuxChiro.git
 Cloning into 'LinuxChiro'...
 remote: Counting objects: 486, done.
 remote: Compressing objects: 100% (96/96), done.
 remote: Total 486 (delta 55), reused 0 (delta 0)
 Receiving objects: 100% (486/486), 116.56 KiB, done.
 Resolving deltas: 100% (317/317), done.
-[autobot@server ~]$ cd LinuxChiro/
-[autobot@server LinuxChiro]$ chmod +x checkup.sh
-[autobot@server LinuxChiro]$
+[user@server ~]$ cd LinuxChiro/
+[user@server LinuxChiro]$ chmod +x checkup.sh
+[user@server LinuxChiro]$
 
-[autobot@server LinuxChiro]$ ./checkup.sh
+[user@server LinuxChiro]$ ./checkup.sh
 You are running as a non-root user with the correct sudo privs.
 OSVER is 5 - Supported
 Usage: ./checkup.sh audit|audit-on|audit-off|fix-quiet|fix-notify|interactive
@@ -70,10 +70,10 @@ fix-quiet   - make changes, no notifications
 fix-notify  - make changes, with notifications of changes made
 interactive - step through each check, give status of all and prompt to fix (if needed)
 
-[autobot@server LinuxChiro]$
+[user@server LinuxChiro]$
 
 
-[autobot@server LinuxChiro]$ ./checkup.sh audit-off
+[user@server LinuxChiro]$ ./checkup.sh audit-off
 You are running as a non-root user with the correct sudo privs.
 OSVER is 5 - Supported
 
@@ -99,10 +99,10 @@ OSVER is 5 - Supported
 ---Incorrect PASS_MIN_DAYS in /etc/login.defs is set to 0, it should be 1
 ---Incorrect PASS_MAX_DAYS in /etc/login.defs is set to 99999, it should be 60
 
-[autobot@server LinuxChiro]$
+[user@server LinuxChiro]$
 
 
-[autobot@server LinuxChiro]$ ./checkup.sh fix-notify
+[user@server LinuxChiro]$ ./checkup.sh fix-notify
 You are running as a non-root user with the correct sudo privs.
 OSVER is 5 - Supported
 
@@ -148,7 +148,7 @@ sudo chown root:utmp /var/log/wtmp
 
 Backups of files that were changed and commands to undo changes are available in /tmp/tmp.SnHUy15391.tar.gz
 
-[autobot@server LinuxChiro]$
+[user@server LinuxChiro]$
 
 
 
