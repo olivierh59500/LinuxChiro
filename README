@@ -206,3 +206,16 @@ To Dos:
 
 -- Check sysctl values before we set then in /etc/sysctl.conf? Maybe They are the defaults and already in place. We will want to add the values to /etc/sysctl but maybe we don't need to make the active change. Same with sshd? Low priority 
 
+-- Things to check in demo script 
+ - Check permision on file 
+ - Check ownership on folder
+ - Set Permision on file 
+ - Change ownership on file 
+ - Set Permision on folder  
+ - Change ownership on folder 
+ - Check value of option in file
+ - Add option to config file 
+ - Restarting of service
+ - Setting of Active Value 
+ - Undoing all of the above 
+
