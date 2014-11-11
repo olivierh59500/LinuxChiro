@@ -349,7 +349,7 @@ do
 		fi #operation check
 		
 		if [[ "$filevaluecheck" != "$correctsetting" ]]; then
-				echo_text_function "$IncorrectText $file is set to $filevaluecheck should be $correctsetting" "OFF"
+			echo_text_function "$IncorrectText $file is set to $filevaluecheck should be $correctsetting" "OFF"
 			#Make Chages
 			if [[ $MAKECHANGES -eq $Yes ]]; then
 				interactive_check_function "Would you like to $operation $file to $correctsetting [y/n]"
