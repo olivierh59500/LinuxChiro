@@ -40,6 +40,7 @@ Requirements:
 Major Feature additions in the works:
 - Ability to optionally source checks from external config files.
 - RPM Package checks
+- Service checks 
 - Ability to create and process a white list of changes that should not be made on a host 
 
 Usage and Example:
