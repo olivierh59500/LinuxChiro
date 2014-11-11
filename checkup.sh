@@ -37,8 +37,25 @@ ErrorText="ERROR"
 
 echo_text_function () {
 	TextToEcho=$1
+	TYPEOFNOTIFICATION=$2
 	
-	echo "$TextToEcho"
+	#Rather than checking the notification setting for each echo, we centralize it here and default to echoing
+	case "TYPEOFNOTIFICATION" in
+	ON)
+		if [[ $ONNOTIFICATIONS -eq $Yes ]]; then
+			echo "$TextToEcho"
+		fi #ONNOTIFICATIONS check
+	;;
+	
+	OFF)
+		if [[ $OFFNOTIFICATIONS -eq $Yes ]]; then
+			echo "$TextToEcho"
+		fi #OFFNOTIFICATIONS check
+	;;
+	
+	*)
+		echo "$TextToEcho"
+	esac
 }
 
 #Command Check - "echo" is the only command we assume exists because we use it for the Command check announcement, it would be nice to run this through the echo_text_function at some point
@@ -350,9 +367,7 @@ do
 		fi #operation check
 		
 		if [[ "$filevaluecheck" != "$correctsetting" ]]; then
-			if [[ $OFFNOTIFICATIONS -eq $Yes ]]; then
-				echo_text_function "$IncorrectText $file is set to $filevaluecheck should be $correctsetting"
-			fi #OFFNOTIFICATIONS check
+				echo_text_function "$IncorrectText $file is set to $filevaluecheck should be $correctsetting" "OFF"
 			#Make Chages
 			if [[ $MAKECHANGES -eq $Yes ]]; then
 				interactive_check_function "Would you like to $operation $file to $correctsetting [y/n]"
@@ -365,14 +380,10 @@ do
 				fi #MAKETHISCHANGE check
 			fi #MAKECHANGES check
 		else #correctsetting check
-			if [[ $ONNOTIFICATIONS -eq $Yes ]]; then
-				echo_text_function "$CorrectText $file is correctly set to $correctsetting"
-			fi #ONNOTIFICATIONS check
+			echo_text_function "$CorrectText $file is correctly set to $correctsetting" "ON"
 		fi #correctsetting check
 	else 
-		if [[ $OFFNOTIFICATIONS -eq $Yes ]]; then
-			echo_text_function "$WarningText $file does not exist"
-		fi #OFFNOTIFICATIONS check
+		echo_text_function "$WarningText $file does not exist" "OFF"
 	fi #file existance check
 done
 
@@ -447,7 +458,7 @@ do
 	servive_to_reload=$(echo $i | awk -F, '{print $7;}')
 	reason=$(echo $i | awk -F, '{print $8;}')
 	
-	if [[ -f $filename ]]; then
+	if [[ -f $filename ]]; then #File Existance check 
 		
 		currentsetting=$(sudo grep "^$option" $filename | tail -n1 | awk -F"$separator" '{print $2;}' | tr -d ' ')
 
@@ -458,13 +469,9 @@ do
 		
 		if [[ "$currentsetting" != "$value" ]]; then
 			if [[ -z "$currentsetting" ]]; then
-				if [[ $OFFNOTIFICATIONS -eq $Yes ]]; then
-					echo_text_function "$IncorrectText $option in $filename is not set, it should be $value"
-				fi #OFFNOTIFICATIONS check
+				echo_text_function "$IncorrectText $option in $filename is not set, it should be $value" "OFF"
 			else #currentsetting else 
-				if [[ $OFFNOTIFICATIONS -eq $Yes ]]; then
-					echo_text_function "$IncorrectText $option in $filename is set to $currentsetting, it should be $value"
-				fi #OFFNOTIFICATIONS check 
+				echo_text_function "$IncorrectText $option in $filename is set to $currentsetting, it should be $value" "OFF"
 			fi #currentsetting end if 
 			#Make Changes
 			if [[ $MAKECHANGES -eq $Yes ]]; then
@@ -490,37 +497,32 @@ do
 						echo_text_function "$ModificationText Adding new entry - $option$separator$value to $filename"
 					fi #current setting blank check else
 					
-					
-					#if [[ $command_to_set_active_value != "none" ]]; then #If there is a need and way to set an active value, do it here
-					#	#Set active value
-					#	sudo $command_to_set_active_value $flag_to_set_active_value $option$separator$value > /dev/null
-					#	if [[ $TURNOFFBACKUPS -eq $No ]]; then
-					#		#Add the command to undo change
-					#		echo "sudo $command_to_set_active_value $flag_to_set_active_value $option$separator$currentsetting" >> $BACKUPFOLDER/$UNDOCOMMANDFILE
-					#	fi 
-					#	echo_text_function "$ModificationText Making the new $option value active by running $command_to_set_active_value $flag_to_set_active_value $option$separator$value"
-					#fi #active value command check
+					if [[ $command_to_set_active_value != "none" ]]; then #active value command check
+					#If there is a need and way to set an active value, do it here
+						#Set active value
+						execute_command_function "sudo $command_to_set_active_value $flag_to_set_active_value $option$separator$value > /dev/null" "sudo $command_to_set_active_value $flag_to_set_active_value $option$separator$currentsetting > /dev/null" ""
+						echo_text_function "$ModificationText Making the new $option value active by running $command_to_set_active_value $flag_to_set_active_value $option$separator$value"
+					fi #active value command check
 					
 					if [[ "$servive_to_reload" != "none" ]]; then
 						#reload the appropriate service 
 						execute_command_function "sudo service $servive_to_reload reload > /dev/null" "sudo service $servive_to_reload reload > /dev/null" ""
-						echo_text_function "$ModificationText Reloaded the $servive_to_reload service" 
+						echo_text_function "$ModificationText Reloading the $servive_to_reload service" 
 					fi #servive_to_reload
 				else #MAKETHISCHANGE
 					echo_text_function "$SkippedText $option left set to $value in $filename"
 				fi #MAKETHISCHANGE check
 			fi #MAKECHANGES check
 		else #currentsetting else
-			if [[ $ONNOTIFICATIONS -eq $Yes ]]; then
-				echo_text_function "$CorrectText $option has correct value of $value in $filename"
-			fi #ONNOTIFICATIONS check
+			echo_text_function "$CorrectText $option has correct value of $value in $filename" "ON"
 		fi #currentsetting check
-	else 
-		if [[ $OFFNOTIFICATIONS -eq $Yes ]]; then
-			echo_text_function "$WarningText $filename does not exist"
-		fi #OFFNOTIFICATIONS check
+	else #File Existance check 
+		echo_text_function "$WarningText $filename does not exist" "OFF"
 	fi #File Existance check 
 done
+
+
+
 
 if [[ $MAKECHANGES -eq $Yes ]]; then
 	echo
