@@ -20,6 +20,7 @@ Other features:
   - It will run as root locally but this produces a warning. 
 - Checks for the availability of required commands before running. 
 - Changes are made immediately active when possible and added to the appropriate files for the next service (ex sshd) restart 
+- Results are compressed and saved on the host so that you can compare with old exams.
 - Descriptive/Custom exit codes
 - Provides brief/simple reasons for making each change
 - All contained in one bash script 
