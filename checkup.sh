@@ -27,12 +27,14 @@ UndeterminedOS=49
 UnsupportedOS=50
 FilevaluecheckError=51
 
-#Set Text
-WarningText="!!!Warning"
+#Set Text 
+#these should all be 12 characters
+WarningText="!!!Warning "
 ModificationText="+++Changing"
 IncorrectText="---Incorrect"
-CorrectText="OK"
-SkippedText="Skipped"
+CorrectText="OK          "
+SkippedText="Skipped     "
+
 ErrorText="ERROR"
 
 echo_text_function () {
@@ -367,7 +369,7 @@ do
 				if [[ $MAKETHISCHANGE -eq $Yes ]]; then
 					execute_command_function "sudo $operation $correctsetting $file" "sudo $operation $filevaluecheck $file"
 					#Check to notify of changes
-					echo_text_function "$ModificationText $operationed $file to $correctsetting to $reason" "CHANGE"
+					echo_text_function "$ModificationText Setting $file to $correctsetting to $reason" "CHANGE"
 				else #MAKETHISCHANGE else 
 					echo_text_function "$SkippedText $file left set to $filevaluecheck" "SKIPPED"
 				fi #MAKETHISCHANGE check
@@ -586,14 +588,14 @@ do
 			echo_text_function "$IncorrectText $servicename Should be set to $correct_setting at boot" "OFF"
 			#Make Changes
 			if [[ $MAKECHANGES -eq $Yes ]]; then
-				interactive_check_function "Would you like to change $$servicename's startup setting to $correct_setting [y/n]"
+				interactive_check_function "Would you like to change $servicename's startup setting to $correct_setting [y/n]"
 					if [[ $MAKETHISCHANGE -eq $Yes ]]; then
 						echo_text_function "$ModificationText Changing $servicename's boot setting to $correct_setting" "CHANGE"
 						execute_command_function "sudo chkconfig $servicename $correct_setting" "sudo chkconfig $servicename $actual_setting" ""
 
 						#Stop the service if it was running and needs to be stopped
 						#We can assume that if it was running it needs to be stopped because of the part of the "correct setting check" if block we are in 
-						if [[ service_was_running ]]; then #was service running check
+						if [[ "$Is_Service_Running" = "$Yes" ]]; then #was service running check
 							echo_text_function "$ModificationText Stopping $servicename because it was running" "CHANGE"
 							execute_command_function "sudo service $servicename stop > /dev/null" "sudo service $servicename start > /dev/null" ""
 						fi #was service running check
