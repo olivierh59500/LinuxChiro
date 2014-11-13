@@ -56,11 +56,12 @@ echo_text_function () {
 		fi #OFFNOTIFICATIONS check
 	;;
 	
-	CHANGE
+	CHANGE)
 		#This is a CHANGE notification, should we announce it?
 		if [[ NOTIFYCHANGES -eq $Yes ]]; then
 			echo "$TextToEcho"
 		fi #NOTIFYCHANGES check
+	;;
 	
 	*)
 		#We'd like to avoid falling into this block
@@ -566,7 +567,6 @@ do
         reason=$(echo $i | awk -F, '{print $3;}')
 		
         does_it_exist=$(sudo /sbin/chkconfig --list $servicename > /dev/null 2>&1)
-		
         if [ $? -eq 0 ]; then #does the service exist check
                 #If the service exists then we need to get its current start-up setting
                 #Note we are only checking run level 3
@@ -582,30 +582,30 @@ do
                                 Is_Service_Running=$No
                         fi #Is_Service_Running check
 						
-							echo_text_function "$IncorrectText $servicename Should be set to $correct_setting at boot" "OFF"
-							#Make Changes
-							if [[ $MAKECHANGES -eq $Yes ]]; then
-								interactive_check_function "Would you like to change $$servicename's startup setting to $correct_setting [y/n]"
-									if [[ $MAKETHISCHANGE -eq $Yes ]]; then
-										echo_text_function "Changing $servicename's boot setting to $correct_setting" "CHANGE"
-										execute_command_function "sudo chkconfig $servicename $correct_setting" "sudo chkconfig $servicename $actual_setting" ""
+			echo_text_function "$IncorrectText $servicename Should be set to $correct_setting at boot" "OFF"
+			#Make Changes
+			if [[ $MAKECHANGES -eq $Yes ]]; then
+				interactive_check_function "Would you like to change $$servicename's startup setting to $correct_setting [y/n]"
+					if [[ $MAKETHISCHANGE -eq $Yes ]]; then
+						echo_text_function "Changing $servicename's boot setting to $correct_setting" "CHANGE"
+						execute_command_function "sudo chkconfig $servicename $correct_setting" "sudo chkconfig $servicename $actual_setting" ""
 
-										#Stop the service if it was running and needs to be stopped
-										#We can assume that if it was running it needs to be stopped because of the part of the "correct setting check" if block we are in 
-										if [[ service_was_running ]] #was service running check
-											echo_text_function "Stopping $servicename because it was running" "CHANGE"
-											execute_command_function "sudo service $servicename stop > /dev/null" "sudo service $servicename start > /dev/null" ""
-										fi #was service running check
+						#Stop the service if it was running and needs to be stopped
+						#We can assume that if it was running it needs to be stopped because of the part of the "correct setting check" if block we are in 
+						if [[ service_was_running ]]; then #was service running check
+							echo_text_function "Stopping $servicename because it was running" "CHANGE"
+							execute_command_function "sudo service $servicename stop > /dev/null" "sudo service $servicename start > /dev/null" ""
+						fi #was service running check
 
-								else #MAKETHISCHANGE else
-										echo_text_function "$SkippedText $servicename startup left set to $correct_setting" ""
-								fi #MAKETHISCHANGE else
-							fi #MAKECHANGES check
+				else #MAKETHISCHANGE else
+						echo_text_function "$SkippedText $servicename startup left set to $correct_setting" ""
+				fi #MAKETHISCHANGE else
+			fi #MAKECHANGES check
                 fi #correct setting check
 
         else #does the service exist check
                 #if it does not exist we see if it should
-				echo_text_function "$servicename is not installed so we can't check it, future versions will handle this better" "WARNING"
+		echo_text_function "$servicename is not installed so we can't check it, future versions will handle this better" "WARNING"
         fi #does the service exist check
 done
 
