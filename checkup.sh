@@ -560,7 +560,8 @@ services_to_check=(
 "crond,on,security"
 "iptables,on,security"
 )
-for i in "${disabled_services[@]}"
+
+for i in "${services_to_check[@]}"
 do
         servicename=$(echo $i | awk -F, '{print $1;}')
         correct_setting=$(echo $i | awk -F, '{print $2;}')
@@ -572,7 +573,7 @@ do
                 #Note we are only checking run level 3
                 actual_setting=$(sudo /sbin/chkconfig --list $servicename | grep "3:" | awk '{print $5;}' | awk -F: '{print $2;}')
                 if [[ $correct_setting -eq $actual_setting ]]; then # correct setting check
-                        echo_text_function "$servicename has the correct startup value of $actual_setting" "ON"
+                        echo_text_function "$CorrectText $servicename has the correct startup value of $actual_setting" "ON"
                 else #correct setting check
 						#The Service did not have the correct startup value
                         #determine if the service is running
@@ -587,13 +588,13 @@ do
 			if [[ $MAKECHANGES -eq $Yes ]]; then
 				interactive_check_function "Would you like to change $$servicename's startup setting to $correct_setting [y/n]"
 					if [[ $MAKETHISCHANGE -eq $Yes ]]; then
-						echo_text_function "Changing $servicename's boot setting to $correct_setting" "CHANGE"
+						echo_text_function "$ModificationText Changing $servicename's boot setting to $correct_setting" "CHANGE"
 						execute_command_function "sudo chkconfig $servicename $correct_setting" "sudo chkconfig $servicename $actual_setting" ""
 
 						#Stop the service if it was running and needs to be stopped
 						#We can assume that if it was running it needs to be stopped because of the part of the "correct setting check" if block we are in 
 						if [[ service_was_running ]]; then #was service running check
-							echo_text_function "Stopping $servicename because it was running" "CHANGE"
+							echo_text_function "$ModificationText Stopping $servicename because it was running" "CHANGE"
 							execute_command_function "sudo service $servicename stop > /dev/null" "sudo service $servicename start > /dev/null" ""
 						fi #was service running check
 
@@ -605,7 +606,7 @@ do
 
         else #does the service exist check
                 #if it does not exist we see if it should
-		echo_text_function "$servicename is not installed so we can't check it, future versions will handle this better" "WARNING"
+		echo_text_function "$WarningText $servicename is not installed so we can't check it, future versions will handle this better" "WARNING"
         fi #does the service exist check
 done
 
