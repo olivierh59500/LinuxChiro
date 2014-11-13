@@ -29,13 +29,12 @@ FilevaluecheckError=51
 
 #Set Text 
 #these should all be 12 characters
-WarningText="!!!Warning "
-ModificationText="+++Changing"
+WarningText="!!!Warning  "
+ModificationText="+++Changing "
 IncorrectText="---Incorrect"
 CorrectText="OK          "
 SkippedText="Skipped     "
-
-ErrorText="ERROR"
+ErrorText="ERROR       "
 
 echo_text_function () {
 	TextToEcho=$1
