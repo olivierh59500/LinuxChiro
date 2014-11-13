@@ -49,17 +49,18 @@ Current Limitations:
 
 Usage and Example:
 
-[user@server ~]$ git clone https://github.com/johnculkin/LinuxChiro.git
+[user@server ~]$ git clone https://github.com/johnculkin/LinuxChiro
 Cloning into 'LinuxChiro'...
-remote: Counting objects: 486, done.
-remote: Compressing objects: 100% (96/96), done.
-remote: Total 486 (delta 55), reused 0 (delta 0)
-Receiving objects: 100% (486/486), 116.56 KiB, done.
-Resolving deltas: 100% (317/317), done.
+remote: Counting objects: 132, done.
+remote: Compressing objects: 100% (132/132), done.
+remote: Total 132 (delta 56), reused 0 (delta 0)
+Receiving objects: 100% (132/132), 39.36 KiB, done.
+Resolving deltas: 100% (56/56), done.
+[user@server ~]$
 [user@server ~]$ cd LinuxChiro/
+[user@server LinuxChiro]$
 [user@server LinuxChiro]$ chmod +x checkup.sh
 [user@server LinuxChiro]$
-
 [user@server LinuxChiro]$ ./checkup.sh
 You are running as a non-root user with the correct sudo privs.
 OSVER is 5 - Supported
@@ -73,68 +74,84 @@ fix-notify  - make changes, with notifications of changes made
 interactive - step through each check, give status of all and prompt to fix (if needed)
 
 [user@server LinuxChiro]$
-
-
 [user@server LinuxChiro]$ ./checkup.sh audit-off
 You are running as a non-root user with the correct sudo privs.
 OSVER is 5 - Supported
 
-!!!Warning /etc/security/console.perms does not exist
-!!!Warning /var/spool/cron/root does not exist
-!!!Warning /root/.tcshrc does not exist
-!!!Warning /root/.bashrc does not exist
-!!!Warning /root/.cshrc does not exist
+!!!Warning   /etc/security/console.perms does not exist
+!!!Warning   /var/spool/cron/root does not exist
+!!!Warning   /root/.tcshrc does not exist
+!!!Warning   /root/.bashrc does not exist
+!!!Warning   /root/.cshrc does not exist
 ---Incorrect /var/log/wtmp is set to 664 should be 600
 ---Incorrect /var/log/rpmpkgs is set to 644 should be 640
 ---Incorrect /var/lib/nfs is set to 755 should be 750
 ---Incorrect /var/log/sa is set to 755 should be 600
-!!!Warning /var/spool/cron/root does not exist
----Incorrect /etc/gshadow is set to 0 should be 0000
----Incorrect /etc/shadow is set to 0 should be 0000
-!!!Warning /var/log/audit/audit.log does not exist
-!!!Warning /var/spool/cron/root does not exist
+!!!Warning   /var/spool/cron/root does not exist
+!!!Warning   /var/log/audit/audit.log does not exist
+!!!Warning   /var/spool/cron/root does not exist
 ---Incorrect /var/log/btmp is set to root:utmp should be root:root
 ---Incorrect /etc/pam.d/atd is set to root:daemon should be root:root
 ---Incorrect /var/log/wtmp is set to root:utmp should be root:root
-!!!Warning /var/log/audit/audit.log does not exist
+!!!Warning   /var/log/audit/audit.log does not exist
+---Incorrect IgnoreRhosts in /etc/ssh/sshd_config is not set, it should be yes
 ---Incorrect PASS_MIN_LEN in /etc/login.defs is set to 5, it should be 14
 ---Incorrect PASS_MIN_DAYS in /etc/login.defs is set to 0, it should be 1
 ---Incorrect PASS_MAX_DAYS in /etc/login.defs is set to 99999, it should be 60
+---Incorrect atd Should be set to off at boot
+---Incorrect cpuspeed Should be set to off at boot
+---Incorrect rhnsd Should be set to off at boot
 
 [user@server LinuxChiro]$
-
-
 [user@server LinuxChiro]$ ./checkup.sh fix-notify
 You are running as a non-root user with the correct sudo privs.
 OSVER is 5 - Supported
 
-+++Changing  /var/log/wtmp to 600 to sec_logs
-+++Changing  /var/log/rpmpkgs to 640 to sec_logs
-+++Changing  /var/lib/nfs to 750 to secure_nfs_folder
-+++Changing  /var/log/sa to 600 to secure_sar_files
-+++Changing  /etc/gshadow to 0000 to secure_gshadow
-+++Changing  /etc/shadow to 0000 to secure_shadow
-+++Changing  /var/log/btmp to root:root to secure_logs
-+++Changing  /etc/pam.d/atd to root:root to secure_pam_conf
-+++Changing  /var/log/wtmp to root:root to secure_wtmp
-+++Changing Changing existing entry - PASS_MIN_LEN 14 in /etc/login.defs
-+++Changing Changing existing entry - PASS_MIN_DAYS 1 in /etc/login.defs
-+++Changing Changing existing entry - PASS_MAX_DAYS 60 in /etc/login.defs
++++Changing  Setting /var/log/wtmp to 600 to sec_logs
++++Changing  Setting /var/log/rpmpkgs to 640 to sec_logs
++++Changing  Setting /var/lib/nfs to 750 to secure_nfs_folder
++++Changing  Setting /var/log/sa to 600 to secure_sar_files
++++Changing  Setting /var/log/btmp to root:root to secure_logs
++++Changing  Setting /etc/pam.d/atd to root:root to secure_pam_conf
++++Changing  Setting /var/log/wtmp to root:root to secure_wtmp
++++Changing  Adding new entry - IgnoreRhosts yes to /etc/ssh/sshd_config
++++Changing  Reloading the sshd service
++++Changing  Changing existing entry - PASS_MIN_LEN 14 in /etc/login.defs
++++Changing  Changing existing entry - PASS_MIN_DAYS 1 in /etc/login.defs
++++Changing  Changing existing entry - PASS_MAX_DAYS 60 in /etc/login.defs
++++Changing  Changing atd's boot setting to off
++++Changing  Stopping atd because it was running
++++Changing  Changing cpuspeed's boot setting to off
++++Changing  Changing rhnsd's boot setting to off
++++Changing  Stopping rhnsd because it was running
 
-Based on the PRESCRIBECOMMANDSONLY variable, we will NOT run the following commands in /tmp/tmp.OwYMT15392/commandstorun.lis
-#!/bin/bash
+Based on the PRESCRIBECOMMANDSONLY variable, we will NOT run the following commands in /tmp/tmp.XsNOJ23873/commandstorun.lis
+BACKUPFOLDER=$(mktemp -d)
 sudo chmod 600 /var/log/wtmp
 sudo chmod 640 /var/log/rpmpkgs
 sudo chmod 750 /var/lib/nfs
 sudo chmod 600 /var/log/sa
-sudo chmod 0000 /etc/gshadow
-sudo chmod 0000 /etc/shadow
 sudo chown root:root /var/log/btmp
 sudo chown root:root /etc/pam.d/atd
 sudo chown root:root /var/log/wtmp
+sudo sed -i11-13-2014-18:01:14:080954000IgnoreRhosts '$aIgnoreRhosts yes' /etc/ssh/sshd_config
+sudo mv /etc/ssh/sshd_config11-13-2014-18:01:14:080954000IgnoreRhosts $BACKUPFOLDER
+sudo service sshd reload > /dev/null
+sudo sed -i11-13-2014-18:01:14:301185000PASS_MIN_LEN '/^PASS_MIN_LEN/s/ 5/ 14/gi' /etc/login.defs
+sudo mv /etc/login.defs11-13-2014-18:01:14:301185000PASS_MIN_LEN $BACKUPFOLDER
+sudo sed -i11-13-2014-18:01:14:332336000PASS_MIN_DAYS '/^PASS_MIN_DAYS/s/ 0/ 1/gi' /etc/login.defs
+sudo mv /etc/login.defs11-13-2014-18:01:14:332336000PASS_MIN_DAYS $BACKUPFOLDER
+sudo sed -i11-13-2014-18:01:14:361291000PASS_MAX_DAYS '/^PASS_MAX_DAYS/s/ 99999/ 60/gi' /etc/login.defs
+sudo mv /etc/login.defs11-13-2014-18:01:14:361291000PASS_MAX_DAYS $BACKUPFOLDER
+sudo chkconfig atd off
+sudo service atd stop > /dev/null
+sudo chkconfig cpuspeed off
+sudo chkconfig rhnsd off
+sudo service rhnsd stop > /dev/null
+echo BACKUPFOLDER used is $BACKUPFOLDER
 
 
-Compressed the Prescribed commands to /tmp/tmp.OwYMT15392.tar.gz
+Compressed the Prescribed commands to /tmp/tmp.XsNOJ23873.tar.gz
 
 Here are the commands to undo the changes if you made them:
 #!/bin/bash
@@ -142,20 +159,25 @@ sudo chmod 664 /var/log/wtmp
 sudo chmod 644 /var/log/rpmpkgs
 sudo chmod 755 /var/lib/nfs
 sudo chmod 755 /var/log/sa
-sudo chmod 0 /etc/gshadow
-sudo chmod 0 /etc/shadow
 sudo chown root:utmp /var/log/btmp
 sudo chown root:daemon /etc/pam.d/atd
 sudo chown root:utmp /var/log/wtmp
-
-Backups of files that were changed and commands to undo changes are available in /tmp/tmp.SnHUy15391.tar.gz
+sudo sed '/^IgnoreRhosts yes/d' /etc/ssh/sshd_config
+sudo service sshd reload > /dev/null
+sudo sed -i '/^PASS_MIN_LEN/s/ 14/ 5/gi' /etc/login.defs
+sudo sed -i '/^PASS_MIN_DAYS/s/ 1/ 0/gi' /etc/login.defs
+sudo sed -i '/^PASS_MAX_DAYS/s/ 60/ 99999/gi' /etc/login.defs
+sudo chkconfig atd on
+sudo service atd start > /dev/null
+sudo chkconfig cpuspeed on
+sudo chkconfig rhnsd on
+sudo service rhnsd start > /dev/null
+Commands to undo changes are available in /tmp/tmp.eDQKK23874.tar.gz
 
 [user@server LinuxChiro]$
 
 
 To Dos:
-
--- 0000 vs 0 file permissions for /etc/shadow (text vs integer?)
 
 -- Code Cleanup:
   -- Get rid of all the exit code status checks in the if statements, put the greps right in the If block 
