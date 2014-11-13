@@ -26,16 +26,6 @@ Other features:
 - Provides brief/simple reasons for making each change
 - All contained in one bash script 
 
-Current Limitations:
-- It will not create files that don't exist but should (ex: /etc/cron.deny). It will warn.
-- It will not delete/remove options, files, services or packages that should not exist. 
-  - Ex Rhost Auth option from pam files, Cron log file "/etc/cron.daily/0logwatch", telnet-server package and rsh service
-  - This isn't a big deal for options in files because we can usually just set things to an appropriate value (ex null or 0) but some things need to be removed. 
-  - It will warn for packages and services that should not exist, currently there is not a way to indicate files and options that should not exist
-- It can't deal correctly with multiple occurrences of an option/value pair in a file (ex: two name servers in /etc/resolve.conf). It evaluates based on the value of the 2nd occurrence, which may cause issues since it could change both instances.  
-- It can't deal with min/max values. It only takes exact - ex if PASS_MAX_DAYS is set to 60 in /etc/login.defs, it will warn if checking for 50 
-- It will not install a service or rpm that should be present but isn't. It will warn. 
-
 Requirements:
 - Runs on RHEL/Centos 5/6 (could easily work on many others, the big difference between versions is the actual checks to perform)
 - Sudo privs without password (This can be trimmed down) 
@@ -46,6 +36,16 @@ Major Feature additions in the works:
 - Ability to optionally source checks from external config files.
 - RPM Package checks (Combine with Service check?)
 - Ability to create and process a white list of changes that should not be made on a host 
+
+Current Limitations:
+- It will not create files that don't exist but should (ex: /etc/cron.deny). It will warn.
+- It will not delete/remove options, files, services or packages that should not exist. 
+  - Ex Rhost Auth option from pam files, Cron log file "/etc/cron.daily/0logwatch", telnet-server package and rsh service
+  - This isn't a big deal for options in files because we can usually just set things to an appropriate value (ex null or 0) but some things need to be removed. 
+  - It will warn for packages and services that should not exist, currently there is not a way to indicate files and options that should not exist
+- It can't deal correctly with multiple occurrences of an option/value pair in a file (ex: two name servers in /etc/resolve.conf). It evaluates based on the value of the 2nd occurrence, which may cause issues since it could change both instances.  
+- It can't deal with min/max values. It only takes exact - ex if PASS_MAX_DAYS is set to 60 in /etc/login.defs, it will warn if checking for 50 
+- It will not install a service or rpm that should be present but isn't. It will warn. 
 
 Usage and Example:
 
