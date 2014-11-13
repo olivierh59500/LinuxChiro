@@ -508,7 +508,7 @@ do
 			echo_text_function "$CorrectText $option has correct value of $value in $filename" "ON"
 		fi #currentsetting check
 	else #File Existance check 
-		echo_text_function "$WarningText $filename does not exist" "OFF" "WARNING"
+		echo_text_function "$WarningText $filename does not exist" "WARNING"
 	fi #File Existance check 
 done
 
