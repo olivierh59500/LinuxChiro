@@ -40,6 +40,7 @@ echo_text_function () {
 	TYPEOFNOTIFICATION=$2
 	
 	#Rather than checking the notification setting for each echo, we centralize it here and default to echoing
+	#We should deal with the "WARNING" and "SKIPPED" cases as well
 	case "$TYPEOFNOTIFICATION" in
 	ON)
 		#This is an ON notification, should we announce it?
@@ -510,6 +511,102 @@ do
 	else #File Existance check 
 		echo_text_function "$WarningText $filename does not exist" "WARNING"
 	fi #File Existance check 
+done
+
+#Service Check
+#Format
+#servicename,should it be on or off (uninstalled will also suffice),reason (for now the default reason is "security", I should make then more descriptive)
+services_to_check=(
+"abrtd,off,security"
+"acpid,off,security"
+"atd,off,security"
+"autofs,off,V-38437"
+"avahi-daemon,off,security"
+"avahi-dnsconfd,off,security"
+"bluetooth,off,security"
+"cpuspeed,off,security"
+"cups anacron,off,security"
+"firstboot,off,security"
+"gpm,off,security"
+"haldeamon,off,security"
+"hiddi,off,security"
+"ip6tables,off,security"
+"kudzu,off,security"
+"mcstrans,off,security"
+"mdmonitor,off,security"
+"messagemuss,off,security"
+"netconsole,off,security"
+"ntpdate,off,security"
+"ntpd, off,security"
+"oddjobd,off,security"
+"pcscd,off,security"
+"qpidd,off,security"
+"rawdevices,off,security"
+"rdisc,off,security"
+"readahead_early,off,security"
+"readahead_later,off,security"
+"restorecond,off,security"
+"rexecd,off,security"
+"rhnsd,off,security"
+"rlogind,off,security"
+"rshd,off,security"
+"smartd,off,security"
+"telnet,off,security"
+"tftp,off,security"
+"vsftpd,off,security"
+"ypbind,off,security"
+"yum-updatesd,off,security"
+"crond,on,security"
+"iptables,on,security"
+)
+for i in "${disabled_services[@]}"
+do
+        servicename=$(echo $i | awk -F, '{print $1;}')
+        correct_setting=$(echo $i | awk -F, '{print $2;}')
+        reason=$(echo $i | awk -F, '{print $3;}')
+		
+        does_it_exist=$(sudo /sbin/chkconfig --list $servicename > /dev/null 2>&1)
+		
+        if [ $? -eq 0 ]; then #does the service exist check
+                #If the service exists then we need to get its current start-up setting
+                #Note we are only checking run level 3
+                actual_setting=$(sudo /sbin/chkconfig --list $servicename | grep "3:" | awk '{print $5;}' | awk -F: '{print $2;}')
+                if [[ $correct_setting -eq $actual_setting ]]; then # correct setting check
+                        echo_text_function "$servicename has the correct startup value of $actual_setting" "ON"
+                else #correct setting check
+						#The Service did not have the correct startup value
+                        #determine if the service is running
+                        if [[ $(sudo service $servicename status > /dev/null 2>&1) ]]; then #Is_Service_Running check
+                                Is_Service_Running=$Yes
+                        else #Is_Service_Running check
+                                Is_Service_Running=$No
+                        fi #Is_Service_Running check
+						
+							echo_text_function "$IncorrectText $servicename Should be set to $correct_setting at boot" "OFF"
+							#Make Changes
+							if [[ $MAKECHANGES -eq $Yes ]]; then
+								interactive_check_function "Would you like to change $$servicename's startup setting to $correct_setting [y/n]"
+									if [[ $MAKETHISCHANGE -eq $Yes ]]; then
+										echo_text_function "Changing $servicename's boot setting to $correct_setting" "CHANGE"
+										execute_command_function "sudo chkconfig $servicename $correct_setting" "sudo chkconfig $servicename $actual_setting" ""
+
+										#Stop the service if it was running and needs to be stopped
+										#We can assume that if it was running it needs to be stopped because of the part of the "correct setting check" if block we are in 
+										if [[ service_was_running ]] #was service running check
+											echo_text_function "Stopping $servicename because it was running" "CHANGE"
+											execute_command_function "sudo service $servicename stop > /dev/null" "sudo service $servicename start > /dev/null" ""
+										fi #was service running check
+
+								else #MAKETHISCHANGE else
+										echo_text_function "$SkippedText $servicename startup left set to $correct_setting" ""
+								fi #MAKETHISCHANGE else
+							fi #MAKECHANGES check
+                fi #correct setting check
+
+        else #does the service exist check
+                #if it does not exist we see if it should
+				echo_text_function "$servicename is not installed so we can't check it, future versions will handle this better" "WARNING"
+        fi #does the service exist check
 done
 
 
