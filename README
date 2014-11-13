@@ -159,7 +159,7 @@ To Dos:
 
 -- Code Cleanup:
   -- Get rid of all the exit code status checks in the if statements, put the greps right in the If block 
-  -- Put all text echos through the function (even errors) 
+  -- Put all text echos through the function (even errors), this will help keep the app quiet when needed
   -- Put a catch all "else" in every if/case statement and custom error
 
 --Feature add:
@@ -197,7 +197,7 @@ To Dos:
 -- Set old password limits by outting "remember=24" at the correct place in the correct line of /etc/pam.d/system-auth
 -- Check the order of tests on a fresh install - ex config network before repo and packages, config packages before options and files perms/ownership - or just recommend to rerun script when making certain changes?
 -- Allow for multiple occurrences of an option/values in a file (ex: two name servers in /etc/resolve.conf)
--- Plan for Apache Confs - do in same config loop? Ex ssl cipher strength and protocol (poodle) 
+-- Get working examples of Apache and other apps - do in same config loop-  Ex ssl cipher strength and protocol (poodle) 
 -- Add check for updates and repo - #"yum check-update/rhn_check" (probably with the package check)
 -- Get it working with RHEL/Centos 7, give script the ability to check different things per OS version, maybe this is better handled with OS specific config files for the checks?
 -- Allow command line changing of the backup and PRESCRIBECOMMANDSONLY options, currenlty they are hard coded. 
@@ -207,7 +207,7 @@ To Dos:
 -- Improve the way that we check if the user running the script has the correct sudo privs, tirm white space etc
 -- Check active sysctl values before we set then in /etc/sysctl.conf? Maybe they are the defaults and already in place. We will want to add the values to /etc/sysctl anyway but maybe we don't need to make the active change. Same with sshd and other services. Low priority 
 -- Get arugments working via pipe (important for massh usage). Might be tough/impossible, may have to rename script and check $0
--- Develop a way to work with OpenScap
+-- Develop a way to work with OpenScap, maybe it can convert OpenScap recommendations to config files?
 
 Notes on Service Checks and RPMs:
 These require the need for a more advanced functionality because some times the correct setting is having something not exist. 
