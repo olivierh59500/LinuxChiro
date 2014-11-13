@@ -7,6 +7,7 @@ What it checks/fixes:
  - Files/folders for permissions and/or ownership
  - Config files for correct option/value settings (separator can be specified)
    - Ex: "PermitEmptyPasswords no" in sshd_config or "net.ipv4.tcp_syncookies = 1" in /etc/sysctl.conf
+ - Service checks (Running and Starup Configs) 
 
 Core functionality:
 - Examination  - Audit things to be fixed, things already fixed or the status of all 
@@ -43,8 +44,7 @@ Requirements:
 
 Major Feature additions in the works:
 - Ability to optionally source checks from external config files.
-- RPM Package checks
-- Service checks 
+- RPM Package checks (Combine with Service check?)
 - Ability to create and process a white list of changes that should not be made on a host 
 
 Usage and Example:
