@@ -535,7 +535,7 @@ services_to_check=(
 "kudzu,off,security"
 "mcstrans,off,security"
 "mdmonitor,off,security"
-"messagemuss,off,security"
+"messagebus,off,security"
 "netconsole,off,security"
 "ntpdate,off,security"
 "ntpd, off,security"
@@ -572,7 +572,7 @@ do
                 #If the service exists then we need to get its current start-up setting
                 #Note we are only checking run level 3
                 actual_setting=$(sudo /sbin/chkconfig --list $servicename | grep "3:" | awk '{print $5;}' | awk -F: '{print $2;}')
-                if [[ $correct_setting -eq $actual_setting ]]; then # correct setting check
+                if [[ "$correct_setting" = "$actual_setting" ]]; then # correct setting check
                         echo_text_function "$CorrectText $servicename has the correct startup value of $actual_setting" "ON"
                 else #correct setting check
 						#The Service did not have the correct startup value
