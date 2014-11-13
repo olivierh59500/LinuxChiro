@@ -539,7 +539,7 @@ services_to_check=(
 "messagebus,off,security"
 "netconsole,off,security"
 "ntpdate,off,security"
-"ntpd, off,security"
+"ntpd,off,security"
 "oddjobd,off,security"
 "pcscd,off,security"
 "qpidd,off,security"
@@ -578,7 +578,8 @@ do
                 else #correct setting check
 						#The Service did not have the correct startup value
                         #determine if the service is running
-                        if [[ $(sudo service $servicename status > /dev/null 2>&1) ]]; then #Is_Service_Running check
+                        sudo service $servicename status > /dev/null 2>&1
+                        if [[ $? -eq 0 ]]; then #Is_Service_Running check
                                 Is_Service_Running=$Yes
                         else #Is_Service_Running check
                                 Is_Service_Running=$No
@@ -607,11 +608,13 @@ do
 
         else #does the service exist check
                 #if it does not exist we see if it should
-		echo_text_function "$WarningText $servicename is not installed so we can't check it, future versions will handle this better" "WARNING"
+                if [[ "$correct_setting" = "on" ]]; then # correct setting check
+			echo_text_function "$IncorrectText $servicename is not installed and it needs to be running, future versions of this script might offer to install it for you" "OFF"
+		else # correct setting check
+			echo_text_function "$CorrectText $servicename is not installed and that is fine because it should not be running" "ON"	
+		fi # correct setting check
         fi #does the service exist check
 done
-
-
 
 
 if [[ $MAKECHANGES -eq $Yes ]]; then
