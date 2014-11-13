@@ -42,18 +42,27 @@ echo_text_function () {
 	#Rather than checking the notification setting for each echo, we centralize it here and default to echoing
 	case "$TYPEOFNOTIFICATION" in
 	ON)
+		#This is an ON notification, should we announce it?
 		if [[ $ONNOTIFICATIONS -eq $Yes ]]; then
 			echo "$TextToEcho"
 		fi #ONNOTIFICATIONS check
 	;;
 	
 	OFF)
+		#This is an OFF notification, should we announce it?
 		if [[ $OFFNOTIFICATIONS -eq $Yes ]]; then
 			echo "$TextToEcho"
 		fi #OFFNOTIFICATIONS check
 	;;
 	
+	CHANGE
+		#This is a CHANGE notification, should we announce it?
+		if [[ NOTIFYCHANGES -eq $Yes ]]; then
+			echo "$TextToEcho"
+		fi #NOTIFYCHANGES check
+	
 	*)
+		#We'd like to avoid falling into this block
 		echo "$TextToEcho"
 	esac
 }
@@ -74,9 +83,9 @@ RootEUID=0
 if [[ $EUID -eq $RootEUID ]]; then
    #Check for a terminal
     if [[ $INATERMINAL -eq $Yes ]]; then
-		echo "Ok I'll let you run this as root in a terminal"
+		echo_text_function "Ok I'll let you run this as root in a terminal"
 	else #INATERMINAL else
-		echo "You really shouldn't be running as root in a non-terminal. Exiting"
+		echo_text_function "You really shouldn't be running as root in a non-terminal. Exiting"
 		exit $RootInNonTerminal
 	fi #End INATERMINAL check
 else #EUID else
@@ -84,9 +93,9 @@ else #EUID else
     #This could be done much better, for now I just want to encourage people to use sudo for its logging capabilites.
 	sudo grep "^\$USER ALL = NOPASSWD: ALL$" /etc/sudoers > /dev/null
 	if [[ $? -ne 0 ]]; then
-		echo "You are running as a non-root user with the correct sudo privs."
+		echo_text_function "You are running as a non-root user with the correct sudo privs."
 	else #Status code else
-		echo "You don't have the required permissions to run this check"
+		echo_text_function "You don't have the required permissions to run this check"
 		exit $PermissionsNeeded
 	fi #End Status code check
 fi #End EUID Check
@@ -106,14 +115,14 @@ if [[ -f /etc/redhat-release ]]; then
 		fi 
 	fi 
 	if [[ $OSVER = "" ]]; then 
-		echo "$ErrorText Could not determine OS Version"
+		echo_text_function "$ErrorText Could not determine OS Version"
 		exit $UndeterminedOS
 	fi 
 else 
-	echo "$ErrorText You are using an unsupported OS. RedHat/Centos required"
+	echo_text_function "$ErrorText You are using an unsupported OS. RedHat/Centos required"
 	exit $UnsupportedOS
 fi 
-echo "OSVER is $OSVER - Supported"
+echo_text_function "OSVER is $OSVER - Supported"
 	
 #Set default values for configs and give explanations
 ONNOTIFICATIONS=$No        #Should we notify things that are configured properly 
@@ -174,7 +183,7 @@ fix-notify)
 
 interactive)
 	if [[ $INATERMINAL -eq $No ]]; then
-		echo "$ErrorText - You need to be in a terminal to make interactive changes"
+		echo_text_function "$ErrorText - You need to be in a terminal to make interactive changes"
 		exit $TerminalNeededForInteractive
 	fi #End INATERMINAL Check
 	ONNOTIFICATIONS=$Yes    #In this case we do want notifications of things that are on/implemented
@@ -356,9 +365,9 @@ do
 				if [[ $MAKETHISCHANGE -eq $Yes ]]; then
 					execute_command_function "sudo $operation $correctsetting $file" "sudo $operation $filevaluecheck $file"
 					#Check to notify of changes
-					echo_text_function "$ModificationText $operationed $file to $correctsetting to $reason"
+					echo_text_function "$ModificationText $operationed $file to $correctsetting to $reason" "CHANGE"
 				else #MAKETHISCHANGE else 
-					echo_text_function "$SkippedText $file left set to $filevaluecheck"
+					echo_text_function "$SkippedText $file left set to $filevaluecheck" "SKIPPED"
 				fi #MAKETHISCHANGE check
 			fi #MAKECHANGES check
 		else #correctsetting check
@@ -446,7 +455,7 @@ do
 
 		#check for additional occurrences
 		if [[ $(sudo grep -c "^$option" $filename) -gt 1 ]]; then
-			echo_text_function "$WarningText There are multiple occurrences of $option in $filename - Only checking the last one"
+			echo_text_function "$WarningText There are multiple occurrences of $option in $filename - Only checking the last one" "WARNING"
 		fi #Multiple occurrences check
 		
 		if [[ "$currentsetting" != "$value" ]]; then
@@ -472,34 +481,34 @@ do
 					if [[ "$currentsetting" != "" ]]; then
 						#Correct the existing value for the option
 						execute_command_function "sudo sed -i$BACKUPEXTENTION '/^$option/s/$separator$currentsetting/$separator$value/gi' $filename" "sudo sed -i '/^$option/s/$separator$value/$separator$currentsetting/gi' $filename" "sudo mv $filename$BACKUPEXTENTION \$BACKUPFOLDER"
-						echo_text_function "$ModificationText Changing existing entry - $option$separator$value in $filename"
+						echo_text_function "$ModificationText Changing existing entry - $option$separator$value in $filename" "CHANGED"
 					else #current setting blank check else
 						#Append the Option and Value to the conf file with the correct separator
 						execute_command_function "sudo sed -i$BACKUPEXTENTION '\$a$option$separator$value' $filename" "sudo sed '/^$option$separator$value/d' $filename" "sudo mv $filename$BACKUPEXTENTION \$BACKUPFOLDER"
-						echo_text_function "$ModificationText Adding new entry - $option$separator$value to $filename"
+						echo_text_function "$ModificationText Adding new entry - $option$separator$value to $filename" "CHANGED"
 					fi #current setting blank check else
 					
 					if [[ $command_to_set_active_value != "none" ]]; then #active value command check
 					#If there is a need and way to set an active value, do it here
 						#Set active value
 						execute_command_function "sudo $command_to_set_active_value $flag_to_set_active_value $option$separator$value > /dev/null" "sudo $command_to_set_active_value $flag_to_set_active_value $option$separator$currentsetting > /dev/null" ""
-						echo_text_function "$ModificationText Making the new $option value active by running $command_to_set_active_value $flag_to_set_active_value $option$separator$value"
+						echo_text_function "$ModificationText Making the new $option value active by running $command_to_set_active_value $flag_to_set_active_value $option$separator$value" "CHANGED"
 					fi #active value command check
 					
 					if [[ "$servive_to_reload" != "none" ]]; then
 						#reload the appropriate service 
 						execute_command_function "sudo service $servive_to_reload reload > /dev/null" "sudo service $servive_to_reload reload > /dev/null" ""
-						echo_text_function "$ModificationText Reloading the $servive_to_reload service" 
+						echo_text_function "$ModificationText Reloading the $servive_to_reload service" "CHANGED"
 					fi #servive_to_reload
 				else #MAKETHISCHANGE
-					echo_text_function "$SkippedText $option left set to $value in $filename"
+					echo_text_function "$SkippedText $option left set to $value in $filename" "SKIPPED"
 				fi #MAKETHISCHANGE check
 			fi #MAKECHANGES check
 		else #currentsetting else
 			echo_text_function "$CorrectText $option has correct value of $value in $filename" "ON"
 		fi #currentsetting check
 	else #File Existance check 
-		echo_text_function "$WarningText $filename does not exist" "OFF"
+		echo_text_function "$WarningText $filename does not exist" "OFF" "WARNING"
 	fi #File Existance check 
 done
 
@@ -512,7 +521,7 @@ if [[ $MAKECHANGES -eq $Yes ]]; then
 	#Backups
 	if [[ $TURNOFFBACKUPS -eq $No ]]; then
 		#We made backups so we need to deal with them
-		echo "echo BACKUPFOLDER used is \$BACKUPFOLDER" >> $PRESCRIBEFOLDER/$PRESCRIBECOMMANDFILE
+		echo_text_function "echo BACKUPFOLDER used is \$BACKUPFOLDER" >> $PRESCRIBEFOLDER/$PRESCRIBECOMMANDFILE
 	fi #TURNOFFBACKUPS check 
 	
 	#Check to see if we are actually suppose to run the commands 
