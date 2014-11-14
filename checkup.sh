@@ -106,13 +106,13 @@ fi #End EUID Check
 
 #Determine version of RedHat/Centos and if it is supported - TODO, get a better way to do this
 if [[ -f /etc/redhat-release ]]; then
-	grep -E "Red Hat|Centos" /etc/redhat-release > /dev/null
+	grep -qE "Red Hat|CentOS" /etc/redhat-release
 	if [[ $? -eq 0 ]]; then 
-		grep "5." /etc/redhat-release > /dev/null
+		grep -q "5." /etc/redhat-release
 		if [[ $? -eq 0 ]]; then
 			OSVER="5"
 		fi 
-		grep "6." /etc/redhat-release > /dev/null
+		grep -q "6." /etc/redhat-release
 		if [[ $? -eq 0 ]]; then
 			OSVER="6"
 		fi 
