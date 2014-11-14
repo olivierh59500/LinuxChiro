@@ -94,7 +94,7 @@ if [[ $EUID -eq $RootEUID ]]; then
 else #EUID else
     #Check that the user has correct sudo privs - TODO: I should trim the white space
     #This could be done much better, for now I just want to encourage people to use sudo for its logging capabilites.
-	sudo grep "^\$USER ALL = NOPASSWD: ALL$" /etc/sudoers > /dev/null
+	sudo grep -q "^\$USER ALL = NOPASSWD: ALL$" /etc/sudoers
 	if [[ $? -ne 0 ]]; then
 		echo_text_function "You are running as a non-root user with the correct sudo privs."
 	else #Status code else
