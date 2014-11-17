@@ -230,6 +230,7 @@ To Dos:
 -- Check active sysctl values before we set then in /etc/sysctl.conf? Maybe they are the defaults and already in place. We will want to add the values to /etc/sysctl anyway but maybe we don't need to make the active change. Same with sshd and other services. Low priority 
 -- Get arugments working via pipe (important for massh usage). Might be tough/impossible, may have to rename script and check $0
 -- Develop a way to work with OpenScap, maybe it can convert OpenScap recommendations to config files?
+-- Add the ability to place a config in a certain section of a file. Ex gpgcheck=1  should be in the [main] section of /etc/yum.conf
 
 Notes on Service Checks and RPMs:
 These require the need for a more advanced functionality because some times the correct setting is having something not exist. 
