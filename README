@@ -13,6 +13,7 @@ Core functionality:
 - Examination  - Audit things to be fixed, things already fixed or the status of all 
 - Prescription - Produces a list of what commands that should be run to resolve issues
 - Adjustment   - Fix issues interactively (locally) and non-interactively (locally/remotely) 
+- Consultation - This script will try to automatically fix as much as possible but it will suggestion things that aren't easy to fix (ex having /tmp on seperate partition) 
 - Insurance    - Backs up things before making each change and creates a list of commands to run to easily undo changes
 
 Other features:
@@ -25,6 +26,7 @@ Other features:
 - Descriptive/Custom exit codes
 - Provides brief/simple reasons for making each change
 - All contained in one bash script 
+- Versioning of this script should follow Semantic Versioning 2.0.0 [http://semver.org/]
 
 Requirements:
 - Runs on RHEL/Centos 5/6 (could easily work on many others, the big difference between versions is the actual checks to perform)
@@ -37,7 +39,7 @@ Major Feature additions in the works:
 - RPM Package checks (Combine with Service check?)
 - Ability to create and process a white list of changes that should not be made on a host 
 
-Current Limitations:
+Current Limitations (some are by design):
 - It will not create files that don't exist but should (ex: /etc/cron.deny). It will warn.
 - It will not delete/remove options, files, services or packages that should not exist. 
   - Ex Rhost Auth option from pam files, Cron log file "/etc/cron.daily/0logwatch", telnet-server package and rsh service
@@ -46,6 +48,7 @@ Current Limitations:
 - It can't deal correctly with multiple occurrences of an option/value pair in a file (ex: two name servers in /etc/resolve.conf). It evaluates based on the value of the 2nd occurrence, which may cause issues since it could change both instances.  
 - It can't deal with min/max values. It only takes exact - ex if PASS_MAX_DAYS is set to 60 in /etc/login.defs, it will warn if checking for 50 
 - It will not install a service or rpm that should be present but isn't. It will warn. 
+- It will not check applications/services that aren't essential to the OS (ex apache/httpd). That is outside the scope of this project. 
 
 Usage and Example:
 
@@ -177,62 +180,20 @@ Commands to undo changes are available in /tmp/tmp.eDQKK23874.tar.gz
 [user@server LinuxChiro]$
 
 
-To Dos:
-
--- Code Cleanup:
-  -- Get rid of all the exit code status checks in the if statements, put the greps right in the If block 
-  -- Put all text echos through the function (even errors), this will help keep the app quiet when needed
-  -- Put a catch all "else" in every if/case statement and custom error
-
---Feature add:
+--Features to add:
   -- Create white list of things that should not be changed on a host. Could this be easily tied to the remediation script? Just remove the lines from the remediation script that are in the white list file???
   -- Break out config of checks to separate files
   -- Package Checking - should we remove and install packages? Check for repos?
   
--- Testing Plan:
--- Create a file to test the script during development - it could just be a set of prescribe and undo scripts 
--- Things to check in demo script 
- - Check permision on file 
- - Check ownership on folder
- - Set Permision on file 
- - Change ownership on file 
- - Set Permision on folder  
- - Change ownership on folder 
- - Check value of option in file
- - Add option to config file 
- - Restarting of service
- - Setting of Active Value 
- - Service running that should be 
- - Servive running that should not be (and does exist) 
- - Servive running that should not be (and does not exist) 
- - Service not running that should not be running
- - Check on/off notification output
- - Undoing all of the above 
- - Interactive Changes 
- - Test on different versions of RedHat/Centos
-
--- Etc:
--- Create Files for DISA, CIS and NIST STIG compliance 
--- SetUID/Stick bit checking?
--- Ability to set max and min for config options, Ex: --Incorrect PASS_MAX_DAYS in /etc/login.defs is set to 99999, it should be 60
 -- Create a way to remove options from config files and remove files that should not exist - Ex Rhost Auth from pam files and Cron log watch spam "/etc/cron.daily/0logwatch"
+
 -- Set old password limits by outting "remember=24" at the correct place in the correct line of /etc/pam.d/system-auth
--- Check the order of tests on a fresh install - ex config network before repo and packages, config packages before options and files perms/ownership - or just recommend to rerun script when making certain changes?
--- Allow for multiple occurrences of an option/values in a file (ex: two name servers in /etc/resolve.conf)
--- Get working examples of Apache and other apps - do in same config loop-  Ex ssl cipher strength and protocol (poodle) 
 -- Add check for updates and repo - #"yum check-update/rhn_check" (probably with the package check)
--- Get it working with RHEL/Centos 7, give script the ability to check different things per OS version, maybe this is better handled with OS specific config files for the checks?
--- Allow command line changing of the backup and PRESCRIBECOMMANDSONLY options, currenlty they are hard coded. 
--- Improve the reasons given for each permisson, config and service check - they are pretty basic now
--- More elegant way to determine RedHat/Centos version
 -- Lessen need on sudo as much as possible, generator a better description of exactly what sudo privs are needed
--- Improve the way that we check if the user running the script has the correct sudo privs, tirm white space etc
 -- Check active sysctl values before we set then in /etc/sysctl.conf? Maybe they are the defaults and already in place. We will want to add the values to /etc/sysctl anyway but maybe we don't need to make the active change. Same with sshd and other services. Low priority 
--- Get arugments working via pipe (important for massh usage). Might be tough/impossible, may have to rename script and check $0
--- Develop a way to work with OpenScap, maybe it can convert OpenScap recommendations to config files?
--- Add the ability to place a config in a certain section of a file. Ex gpgcheck=1  should be in the [main] section of /etc/yum.conf
 
 Notes on Service Checks and RPMs:
-These require the need for a more advanced functionality because some times the correct setting is having something not exist. 
+These require the need for a more advanced functionality because some times the correct setting is having something not exist. Remvoing something could cause a lot of issues and creating an undo for this change might be tricky 
+
 I should looking into creating a core function that would help with this because it seems to be very repetitious 
 
