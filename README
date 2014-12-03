@@ -7,7 +7,7 @@ What it checks/fixes:
  - Files/folders for permissions and/or ownership
  - Config files for correct option/value settings (separator can be specified)
    - Ex: "PermitEmptyPasswords no" in sshd_config or "net.ipv4.tcp_syncookies = 1" in /etc/sysctl.conf
- - Service checks (Running and Starup Configs) 
+ - Service checks (Running and Startup Configs) 
 
 Core functionality:
 - Examination  - Audit things to be fixed, things already fixed or the status of all 
@@ -179,21 +179,4 @@ Commands to undo changes are available in /tmp/tmp.eDQKK23874.tar.gz
 
 [user@server LinuxChiro]$
 
-
---Features to add:
-  -- Create white list of things that should not be changed on a host. Could this be easily tied to the remediation script? Just remove the lines from the remediation script that are in the white list file???
-  -- Break out config of checks to separate files
-  -- Package Checking - should we remove and install packages? Check for repos?
-  
--- Create a way to remove options from config files and remove files that should not exist - Ex Rhost Auth from pam files and Cron log watch spam "/etc/cron.daily/0logwatch"
-
--- Set old password limits by outting "remember=24" at the correct place in the correct line of /etc/pam.d/system-auth
--- Add check for updates and repo - #"yum check-update/rhn_check" (probably with the package check)
--- Lessen need on sudo as much as possible, generator a better description of exactly what sudo privs are needed
--- Check active sysctl values before we set then in /etc/sysctl.conf? Maybe they are the defaults and already in place. We will want to add the values to /etc/sysctl anyway but maybe we don't need to make the active change. Same with sshd and other services. Low priority 
-
-Notes on Service Checks and RPMs:
-These require the need for a more advanced functionality because some times the correct setting is having something not exist. Remvoing something could cause a lot of issues and creating an undo for this change might be tricky 
-
-I should looking into creating a core function that would help with this because it seems to be very repetitious 
-
+ 
