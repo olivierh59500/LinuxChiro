@@ -515,6 +515,78 @@ do
 	fi #File Existance check 
 done
 
+#Package Check
+#Format
+#packagename,should it be installed or not,reason (for now the default reason is "security", I should make then more descriptive)
+packages_to_check=(
+
+"openssh-server,installed,security"
+"openssl,installed,security"
+"redhat-release-server,installed,security"
+"rhn-check,installed,security"
+"rhn-client-tools,installed,security"
+"rhnlib,installed,security"
+"rhnsd,installed,security"
+"ldap-server,uninstalled,security"
+"openldap-servers,uninstalled,security"
+"rsh-server,uninstalled,security"
+"telnet-server,uninstalled,security"
+"tftp-server,uninstalled,security"
+"ypserv,uninstalled,security"
+)
+
+for i in "${packages_to_check[@]}"
+do
+        packagename=$(echo $i | awk -F, '{print $1;}')
+        correct_setting=$(echo $i | awk -F, '{print $2;}')
+        reason=$(echo $i | awk -F, '{print $3;}')
+		
+        does_it_exist=$(sudo /bin/rpm -q $packagename > /dev/null 2>&1)
+		
+        if [ $? -eq 0 ]; then #does the package exist check
+		
+			#If the package does exist, we need to see if it should
+			if [[ "$correct_setting" = "installed" ]]; then # correct setting check
+					echo_text_function "$CorrectText $packagename has the correct installed value of $correct_setting" "ON"
+			else #correct setting check
+				#The Package did not have the correct installed value
+					
+				echo_text_function "$IncorrectText $packagename Should have an installed setting of $correct_setting" "OFF"
+				#Make Changes
+				if [[ $MAKECHANGES -eq $Yes ]]; then
+					interactive_check_function "Would you like to change $packagename's installed value to $correct_setting [y/n]"
+						if [[ $MAKETHISCHANGE -eq $Yes ]]; then
+							echo_text_function "$ModificationText Changing $packagename's installed value to $correct_setting" "CHANGE"
+							execute_command_function "sudo /usr/bin/yum -y remove $packagename" "sudo /usr/bin/yum -y install $packagename" ""
+					else #MAKETHISCHANGE else
+							echo_text_function "$SkippedText $packagename installed value left to uninstalled" ""
+					fi #MAKETHISCHANGE else
+				fi #MAKECHANGES check
+            fi #correct setting check
+
+        else #does the package exist check
+                #if it does not exist we see if it should
+                if [[ "$correct_setting" = "installed" ]]; then # correct setting check
+			
+					#The Package did not have the correct installed value
+					echo_text_function "$IncorrectText $packagename Should have an installed setting of $correct_setting" "OFF"
+					#Make Changes
+					if [[ $MAKECHANGES -eq $Yes ]]; then
+						interactive_check_function "Would you like to change $packagename's installed value to $correct_setting [y/n]"
+							if [[ $MAKETHISCHANGE -eq $Yes ]]; then
+								echo_text_function "$ModificationText Changing $packagename's installed value to $correct_setting" "CHANGE"
+								execute_command_function "sudo /usr/bin/yum -y install $packagename" "sudo /usr/bin/yum -y remove $packagename" ""
+						else #MAKETHISCHANGE else
+								echo_text_function "$SkippedText $packagename installed value left to installed" ""
+						fi #MAKETHISCHANGE else
+					fi #MAKECHANGES check
+					
+				else # correct setting check
+					echo_text_function "$CorrectText $packagename is not installed and that is fine because it should not be" "ON"	
+				fi # correct setting check
+        fi #does the package exist check
+done
+
 #Service Check
 #Format
 #servicename,should it be on or off (uninstalled will also suffice),reason (for now the default reason is "security", I should make then more descriptive)
