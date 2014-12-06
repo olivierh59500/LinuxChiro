@@ -601,7 +601,7 @@ do
 						fi #was service running check
 
 				else #MAKETHISCHANGE else
-						echo_text_function "$SkippedText $servicename startup left set to $correct_setting" ""
+						echo_text_function "$SkippedText $servicename startup left set to $actual_setting" ""
 				fi #MAKETHISCHANGE else
 			fi #MAKECHANGES check
                 fi #correct setting check
