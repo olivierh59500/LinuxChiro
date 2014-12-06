@@ -591,7 +591,7 @@ do
 				interactive_check_function "Would you like to change $servicename's startup setting to $correct_setting [y/n]"
 					if [[ $MAKETHISCHANGE -eq $Yes ]]; then
 						echo_text_function "$ModificationText Changing $servicename's boot setting to $correct_setting" "CHANGE"
-						execute_command_function "sudo chkconfig $servicename $correct_setting" "sudo chkconfig $servicename $actual_setting" ""
+						execute_command_function "sudo /sbin/chkconfig $servicename $correct_setting" "sudo /sbin/chkconfig $servicename $actual_setting" ""
 
 						#Stop the service if it was running and needs to be stopped
 						#We can assume that if it was running it needs to be stopped because of the part of the "correct setting check" if block we are in 
