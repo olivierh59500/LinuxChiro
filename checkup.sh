@@ -2,7 +2,7 @@
 
 #Normal Operation
 OPERMODE=$1
-#Example of hard coding argument for remote testing
+#Example of hard coding argument for remote testing or added security 
 #OPERMODE=audit-all
 
 #Set the No/Yes Values for easier code reading
@@ -198,15 +198,18 @@ interactive)
 ;;
 
 *)
-	echo "Usage: $0 audit|audit-on|audit-off|fix-quiet|fix-notify|interactive"
+	echo "Usage: $0 audit-all|audit-on|audit-off|fix-quiet|fix-notify|interactive"
 	echo
 	echo "audit-all   - make no changes, notify status of all checks"
 	echo "audit-on    - make no changes, notify status of only implemented checks"
-	echo "audit-off   - make no changes, notify status of only non-implemented checks"
+ 	echo "audit-off   - make no changes, notify status of only non-implemented checks (and warnings)"
 	echo "fix-quiet   - make changes, no notifications"
 	echo "fix-notify  - make changes, with notifications of changes made"
 	echo "interactive - step through each check, give status of all and prompt to fix (if needed)"
 	echo
+	echo Example:
+	echo [user@server LinuxChiro]$ ./checkup.sh audit-all 	
+	echo 
 	exit $UsagePrint
 esac
 
@@ -549,7 +552,7 @@ services_to_check=(
 "readahead_later,off,security"
 "restorecond,off,security"
 "rexecd,off,security"
-"rhnsd,off,security"
+"rhnsd,on,configuration"
 "rlogind,off,security"
 "rshd,off,security"
 "smartd,off,security"
