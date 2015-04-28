@@ -18,15 +18,14 @@ Core functionality:
 
 Other features:
 - Runs agentless remotely via a ssh (it won't take arguments when run remotely but you can hard code the option) 
-- Runs as non root and performs rudimentary check for required sudo privs (better checks coming in future version).
-  - It will run as root locally but this produces a warning. 
+- Runs as non root and performs rudimentary checks for required sudo privs (better checks coming in future version).
+  - It will run as root locally (with a warning). 
 - Checks for the availability of required commands before running. 
-- Changes are made immediately active when possible and added to the appropriate files for the next service (ex sshd) restart 
-- Results are compressed and saved on the host so that you can compare with old exams.
-- Descriptive/Custom exit codes
-- Provides brief/simple reasons for making each change
-- All contained in one bash script 
-- Versioning of this script should follow Semantic Versioning 2.0.0 [http://semver.org/]
+- Changes can be made immediately active when possible and added to the appropriate files for the next service (ex sshd) restart 
+- Results are compressed and saved on the host so that you can compare with past exams.
+- Configurable and (hopefully) descriptive exit codes
+- Provides brief/simple reason for making each change
+- All contained in one bash script
 
 Requirements:
 - Runs on RHEL/Centos 5/6 (could easily work on many others, the big difference between versions is the actual checks to perform)
@@ -48,7 +47,6 @@ Current Limitations (some are by design):
 - It can't deal correctly with multiple occurrences of an option/value pair in a file (ex: two name servers in /etc/resolve.conf). It evaluates based on the value of the 2nd occurrence, which may cause issues since it could change both instances.  
 - It can't deal with min/max values. It only takes exact - ex if PASS_MAX_DAYS is set to 60 in /etc/login.defs, it will warn if checking for 50 
 - It will not install a service or rpm that should be present but isn't. It will warn. 
-- It will not check applications/services that aren't essential to the OS (ex apache/httpd). That is outside the scope of this project. 
 
 Usage and Example:
 
