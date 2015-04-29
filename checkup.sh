@@ -208,7 +208,7 @@ interactive)
 	echo "interactive - step through each check, give status of all and prompt to fix (if needed)"
 	echo
 	echo Example:
-	echo [user@server LinuxChiro]$ ./checkup.sh audit-all 	
+	echo [user@server LinuxChiro]$ $0 audit-all 	
 	echo 
 	exit $UsagePrint
 esac
@@ -393,6 +393,9 @@ sshd_service="sshd"
 logins_defs="/etc/login.defs"
 sysconfig_init="/etc/sysconfig/init"
 system_auth="/etc/pam.d/system-auth"
+httpd_conf="/etc/httpd/conf/httpd.conf"
+ssl_conf="/etc/httpd/conf.d/ssl.conf"
+php_conf="/etc/php.ini"
 
 #Configure some things
 #format:
@@ -441,6 +444,14 @@ Conf_LOOP=(
 "$logins_defs,PASS_WARN_AGE,7, ,none,none,none,logins_defs_securing"
 "$logins_defs,ENCRYPT_METHOD,SHA512, ,none,none,none,logins_defs_securing"
 "$sysconfig_init,PROMPT,no,=,none,none,none,sysconfig_securing"
+"$httpd_conf,ServerSignature,Off, ,none,none,httpd,httpd_securing"
+"$httpd_conf,ServerTokens,Prod, ,none,none,httpd,httpd_securing"
+"$httpd_conf,TraceEnable,Off, ,none,none,httpd,httpd_securing"
+"$httpd_conf,Header always append,SAMEORIGIN, X-Frame-Options ,none,none,httpd,click_jacking_protection"
+"$ssl_conf,SSLProtocol,all -SSLv3 -TLSv1, ,none,none,httpd,ssl_secure_protocols"
+"$ssl_conf,SSLCipherSuite,ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-DSS-AES128-GCM-SHA256:kEDH+AESGCM:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA:ECDHE-ECDSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA:DHE-DSS-AES128-SHA256:DHE-RSA-AES256-SHA256:DHE-DSS-AES256-SHA:DHE-RSA-AES256-SHA:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!3DES:!MD5:!PSK, ,none,none,httpd,ssl_secure_ciphers"
+"$ssl_conf,SSLHonorCipherOrder,on, ,none,none,httpd,ssl_obey_server_ciphers"
+"$php_conf,expose_php,off,=,none,none,none,php_securing"
 )
 
 #TODO - check for duplicate entries of the same option (especially with different values)
@@ -456,8 +467,11 @@ do
 	reason=$(echo $i | awk -F, '{print $8;}')
 	
 	if [[ -f $filename ]]; then #File Existance check 
-		
-		currentsetting=$(sudo grep "^$option" $filename | tail -n1 | awk -F"$separator" '{print $2;}' | tr -d ' ')
+	      
+		#We pipe to tail -n1 because there is a current limitation that we can only check one instance of the option, so we check the last. 
+		#"Usually" the last option is the one that is put into use. 
+		#How do we deal with leading and trailing white spaces and tabs??????!!!?	
+		currentsetting=$(sudo grep "^$option" $filename | tail -n1 | awk -F"$separator" '{$1=""; print $0}'| sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
 
 		#check for additional occurrences
 		if [[ $(sudo grep -c "^$option" $filename) -gt 1 ]]; then
@@ -478,7 +492,7 @@ do
 				if [[ $MAKETHISCHANGE -eq $Yes ]]; then
 					if [[ $TURNOFFBACKUPS -eq $No ]]; then
 						#Generate a backup hash unique to each check
-						BACKUPEXTENTION="$(date +"%m-%d-%Y-%k:%M:%S:%N")$option"
+						BACKUPEXTENTION="$(date +"%m-%d-%Y-%k:%M:%S:%N")${option//[[:blank:]]/}"
 					else 
 						BACKUPEXTENTION=""
 					fi 
