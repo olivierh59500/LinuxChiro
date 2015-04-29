@@ -1,13 +1,19 @@
 #!/bin/bash
 
-#Normal Operation
+#Set the No/Yes Values for easier code reading
+No=0
+Yes=1
+ 
+#-------- Begin Configs ------#
+#Normal Operation - take command line argument for run mode Ex: audit-all
 OPERMODE=$1
 #Example of hard coding argument for remote testing or added security 
 #OPERMODE=audit-all
 
-#Set the No/Yes Values for easier code reading
-No=0
-Yes=1
+#We hard code the following options for safety, in the future we might allow changing via commnad line
+TURNOFFBACKUPS=$No         #Should we turn off backups? 
+PRESCRIBECOMMANDSONLY=$Yes #Do we only create a list of command to remediate the checks and run them later?  (No=run now,Yes=only create list)
+#--------- End Configs --------#
 
 #Set Default value
 INATERMINAL=0
@@ -94,8 +100,11 @@ if [[ $EUID -eq $RootEUID ]]; then
 else #EUID else
     #Check that the user has correct sudo privs - TODO: I should trim the white space
     #This could be done much better, for now I just want to encourage people to use sudo for its logging capabilites.
-	sudo grep -q "^\$USER ALL = NOPASSWD: ALL$" /etc/sudoers
-	if [[ $? -ne 0 ]]; then
+    #I'll start to keep a list of what commands we need to sudo without a passworda
+    #Ideal /etc/sudoers line:
+    #^\$USER ALL = NOPASSWD:/bin/ls,/bin/tar,/bin/cat,/bin/grep,/usr/bin/stat,/bin/echo,/bin/sed,/bin/mv,/sbin/service,/sbin/chkconfig,/sbin/sysctl
+        sudo grep -q "^$USER ALL = NOPASSWD: ALL$" /etc/sudoers
+	if [ $? -eq 0 ]; then
 		echo_text_function "You are running as a non-root user with the correct sudo privs."
 	else #Status code else
 		echo_text_function "You don't have the required permissions to run this check"
@@ -106,14 +115,11 @@ fi #End EUID Check
 
 #Determine version of RedHat/Centos and if it is supported - TODO, get a better way to do this
 if [[ -f /etc/redhat-release ]]; then
-	grep -qE "Red Hat|CentOS" /etc/redhat-release
-	if [[ $? -eq 0 ]]; then 
-		grep -q "5." /etc/redhat-release
-		if [[ $? -eq 0 ]]; then
+	if grep -qE "Red Hat|CentOS" /etc/redhat-release; then 
+		if grep -q "5." /etc/redhat-release; then
 			OSVER="5"
 		fi 
-		grep -q "6." /etc/redhat-release
-		if [[ $? -eq 0 ]]; then
+		if grep -q "6." /etc/redhat-release; then
 			OSVER="6"
 		fi 
 	fi 
@@ -134,9 +140,6 @@ NOTIFYCHANGES=$No          #Should we notify of changes
 MAKECHANGES=$No            #Should we make changes 
 INTERACTIVECHANGES=$No     #Should we the user to make select what changes to make 
 
-#We hard code the following options for safety, in the future we might allow changing via commnad line
-TURNOFFBACKUPS=$No         #Should we turn off backups? 
-PRESCRIBECOMMANDSONLY=$Yes #Do we only create a list of command to remediate the checks and run then later?  (No=run now,Yes=only create list)
 
 case "$OPERMODE" in
 audit-all)
@@ -150,6 +153,7 @@ audit-all)
 
 audit-on)
 	ONNOTIFICATIONS=$Yes   #In this case we want notifications of things that are on/implemented
+w
 	OFFNOTIFICATIONS=$No   #In this case we dont want notifications of things that are off/not implemented
 	NOTIFYCHANGES=$No      #Nothing should change in an audit
 	MAKECHANGES=$No        #Nothing should change in an audit
@@ -354,7 +358,8 @@ do
 	correctsetting=$(echo $i | awk -F, '{print $3;}')
 	reason=$(echo $i | awk -F, '{print $4;}')
 	#Check the file or directory exists
-	if [[ -f $file ]] || [[ -d $file ]]; then
+	sudo stat $file > /dev/null 2>&1
+	if [ $? -eq 0 ]; then
 		if [[ $operation = "$FILEPERMCHANGECOMMAND" ]]; then #operation check
 			filevaluecheck=$(sudo stat -c %a $file)
 		elif [[ $operation = "$FILEOWNSHIPCHANGECOMMAND" ]]; then #operation check
@@ -438,10 +443,10 @@ Conf_LOOP=(
 "$sshd_config,PermitUserEnvironment,no, ,none,none,$sshd_service,sshd_tuning"
 "$sshd_config,Banner,/etc/issue, ,none,none,$sshd_service,sshd_tuning"
 "$etc_resolv_conf,search,scranton.edu, ,none,none,none,set_default_dns_search"
-"$logins_defs,PASS_MIN_LEN,14, ,none,none,none,logins_defs_securing"
-"$logins_defs,PASS_MIN_DAYS,1, ,none,none,none,logins_defs_securing"
-"$logins_defs,PASS_MAX_DAYS,60, ,none,none,none,logins_defs_securing"
-"$logins_defs,PASS_WARN_AGE,7, ,none,none,none,logins_defs_securing"
+"$logins_defs,PASS_MIN_LEN,14,\t,none,none,none,logins_defs_securing"
+"$logins_defs,PASS_MIN_DAYS,1,\t,none,none,none,logins_defs_securing"
+"$logins_defs,PASS_MAX_DAYS,60,\t,none,none,none,logins_defs_securing"
+"$logins_defs,PASS_WARN_AGE,7,\t,none,none,none,logins_defs_securing"
 "$logins_defs,ENCRYPT_METHOD,SHA512, ,none,none,none,logins_defs_securing"
 "$sysconfig_init,PROMPT,no,=,none,none,none,sysconfig_securing"
 "$httpd_conf,ServerSignature,Off, ,none,none,httpd,httpd_securing"
@@ -467,7 +472,8 @@ do
 	servive_to_reload=$(echo $i | awk -F, '{print $7;}')
 	reason=$(echo $i | awk -F, '{print $8;}')
 	
-	if [[ -f $filename ]]; then #File Existance check 
+	sudo stat $filename > /dev/null 2>&1
+	if [ $? -eq 0 ]; then #File Existance check
 	      
 		#We pipe to tail -n1 because there is a current limitation that we can only check one instance of the option, so we check the last. 
 		#"Usually" the last option is the one that is put into use. 
