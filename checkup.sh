@@ -448,6 +448,7 @@ Conf_LOOP=(
 "$httpd_conf,ServerTokens,Prod, ,none,none,httpd,httpd_securing"
 "$httpd_conf,TraceEnable,Off, ,none,none,httpd,httpd_securing"
 "$httpd_conf,Header always append,SAMEORIGIN, X-Frame-Options ,none,none,httpd,click_jacking_protection"
+"$ssl_conf,Header always add,'max-age=15768000', Strict-Transport-Security ,none,none,httpd,click_jacking_protection"
 "$ssl_conf,SSLProtocol,all -SSLv3 -TLSv1, ,none,none,httpd,ssl_secure_protocols"
 "$ssl_conf,SSLCipherSuite,ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-DSS-AES128-GCM-SHA256:kEDH+AESGCM:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA:ECDHE-ECDSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA:DHE-DSS-AES128-SHA256:DHE-RSA-AES256-SHA256:DHE-DSS-AES256-SHA:DHE-RSA-AES256-SHA:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!3DES:!MD5:!PSK, ,none,none,httpd,ssl_secure_ciphers"
 "$ssl_conf,SSLHonorCipherOrder,on, ,none,none,httpd,ssl_obey_server_ciphers"
