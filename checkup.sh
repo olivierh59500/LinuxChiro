@@ -300,7 +300,6 @@ file_and_perm_array=(
 "$FILEPERMCHANGECOMMAND,/etc/security/console.perms,600,disable_user_mounted_removable_file_systems"
 "$FILEPERMCHANGECOMMAND,/var/log/dmesg,640,prevent_access_to_dmesg"
 "$FILEPERMCHANGECOMMAND,/etc/sysctl.conf,600,secure_sysctl"
-"$FILEPERMCHANGECOMMAND,/var/spool/cron/root,700,sec_for_root"
 "$FILEPERMCHANGECOMMAND,/root,700,root_home_dir"
 "$FILEPERMCHANGECOMMAND,/root/.tcshrc,400,sec_for_root"
 "$FILEPERMCHANGECOMMAND,/root/.bashrc,400,sec_for_root"
@@ -453,11 +452,11 @@ Conf_LOOP=(
 "$httpd_conf,ServerTokens,Prod, ,none,none,httpd,httpd_securing"
 "$httpd_conf,TraceEnable,Off, ,none,none,httpd,httpd_securing"
 "$httpd_conf,Header always append,SAMEORIGIN, X-Frame-Options ,none,none,httpd,click_jacking_protection"
-"$ssl_conf,Header always add,'max-age=15768000', Strict-Transport-Security ,none,none,httpd,click_jacking_protection"
+"$ssl_conf,Header always add,\"max-age=15768000\", Strict-Transport-Security ,none,none,httpd,HSTS_enforcement"
 "$ssl_conf,SSLProtocol,all -SSLv3 -TLSv1, ,none,none,httpd,ssl_secure_protocols"
 "$ssl_conf,SSLCipherSuite,ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256:DHE-DSS-AES128-GCM-SHA256:kEDH+AESGCM:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES128-SHA:ECDHE-ECDSA-AES128-SHA:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-AES256-SHA:ECDHE-ECDSA-AES256-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA:DHE-DSS-AES128-SHA256:DHE-RSA-AES256-SHA256:DHE-DSS-AES256-SHA:DHE-RSA-AES256-SHA:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!3DES:!MD5:!PSK, ,none,none,httpd,ssl_secure_ciphers"
 "$ssl_conf,SSLHonorCipherOrder,on, ,none,none,httpd,ssl_obey_server_ciphers"
-"$php_conf,expose_php,off,=,none,none,none,php_securing"
+"$php_conf,expose_php,off, = ,none,none,none,php_securing"
 )
 
 #TODO - check for duplicate entries of the same option (especially with different values)
@@ -511,7 +510,7 @@ do
 						echo_text_function "$ModificationText Changing existing entry - $option$separator$value in $filename" "CHANGED"
 					else #current setting blank check else
 						#Append the Option and Value to the conf file with the correct separator
-						execute_command_function "sudo sed -i$BACKUPEXTENTION '\$a$option$separator$value' $filename" "sudo sed '/^$option$separator$value/d' $filename" "sudo mv $filename$BACKUPEXTENTION \$BACKUPFOLDER"
+						execute_command_function "sudo sed -i$BACKUPEXTENTION '\$a$option$separator$value' $filename" "sudo sed -i '/^$option$separator$value/d' $filename" "sudo mv $filename$BACKUPEXTENTION \$BACKUPFOLDER"
 						echo_text_function "$ModificationText Adding new entry - $option$separator$value to $filename" "CHANGED"
 					fi #current setting blank check else
 					
