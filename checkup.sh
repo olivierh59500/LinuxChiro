@@ -8,11 +8,11 @@ Yes=1
 #Normal Operation - take command line argument for run mode Ex: audit-all
 OPERMODE=$1
 #Example of hard coding argument for remote testing or added security 
-#OPERMODE=audit-all
+#OPERMODE=fix-notify
 
 #We hard code the following options for safety, in the future we might allow changing via commnad line
 TURNOFFBACKUPS=$No         #Should we turn off backups? 
-PRESCRIBECOMMANDSONLY=$Yes #Do we only create a list of command to remediate the checks and run them later?  (No=run now,Yes=only create list)
+PRESCRIBECOMMANDSONLY=$No #Do we only create a list of command to remediate the checks and run them later?  (No=run now,Yes=only create list)
 #--------- End Configs --------#
 
 #Set Default value
