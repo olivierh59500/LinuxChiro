@@ -453,7 +453,7 @@ Conf_LOOP=(
 "$httpd_conf,TraceEnable,Off, ,none,none,httpd,httpd_securing"
 "$httpd_conf,Header always append,SAMEORIGIN, X-Frame-Options ,none,none,httpd,click_jacking_protection"
 "$ssl_conf,Header always add,\"max-age=15768000\", Strict-Transport-Security ,none,none,httpd,HSTS_enforcement"
-"$ssl_conf,SSLProtocol,all -SSLv3 -TLSv1, ,none,none,httpd,ssl_secure_protocols"
+"$ssl_conf,SSLProtocol,all -SSLv2 -SSLv3, ,none,none,httpd,ssl_secure_protocols"
 "$ssl_conf,SSLCipherSuite,HIGH:!aNULL:!MD5:!EXP, ,none,none,httpd,ssl_secure_ciphers"
 "$ssl_conf,SSLHonorCipherOrder,on, ,none,none,httpd,ssl_obey_server_ciphers"
 "$php_conf,expose_php,off, = ,none,none,none,php_securing"
