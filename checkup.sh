@@ -12,7 +12,7 @@ OPERMODE=$1
 
 #We hard code the following options for safety, in the future we might allow changing via commnad line
 TURNOFFBACKUPS=$No         #Should we turn off backups? 
-PRESCRIBECOMMANDSONLY=$No #Do we only create a list of command to remediate the checks and run them later?  (No=run now,Yes=only create list)
+PRESCRIBECOMMANDSONLY=$Yes #Do we only create a list of command to remediate the checks and run them later?  (No=run now,Yes=only create list)
 #--------- End Configs --------#
 
 #Set Default value
