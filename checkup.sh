@@ -498,7 +498,7 @@ do
 				if [[ $MAKETHISCHANGE -eq $Yes ]]; then
 					if [[ $TURNOFFBACKUPS -eq $No ]]; then
 						#Generate a backup hash unique to each check
-						BACKUPEXTENTION="$(date +"%m-%d-%Y-%k:%M:%S:%N")${option//[[:blank:]]/}"
+						BACKUPEXTENTION="$(date +"%m-%d-%Y-%H:%M:%S:%N")${option//[[:blank:]]/}"
 					else 
 						BACKUPEXTENTION=""
 					fi 
