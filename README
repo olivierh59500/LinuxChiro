@@ -49,7 +49,7 @@ Current Limitations (some are by design) and notes:
 - It will not install a service or rpm that should be present but isn't. It will warn. 
 - It will add option/value pairs to the correct location in a config file, Ex below an existing line. Therefore there is an optimal order of config checks, prerequisites first. 
   - If the prerequite config (for positioning) does not exist, it will not add the option/value pair. 
-  - It will not reposition an existing option/value pair. 
+  - It will not reposition an existing option/value pair. It will warn. Hopefully in the future we can reposition (thats what Chiros do!)
 
 Usage and Example:
 
