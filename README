@@ -38,7 +38,7 @@ Major Feature additions in the works:
 - RPM Package checks (Combine with Service check?)
 - Ability to create and process a white list of changes that should not be made on a host 
 
-Current Limitations (some are by design):
+Current Limitations (some are by design) and notes:
 - It will not create files that don't exist but should (ex: /etc/cron.deny). It will warn.
 - It will not delete/remove options, files, services or packages that should not exist. 
   - Ex Rhost Auth option from pam files, Cron log file "/etc/cron.daily/0logwatch", telnet-server package and rsh service
@@ -47,6 +47,9 @@ Current Limitations (some are by design):
 - It can't deal correctly with multiple occurrences of an option/value pair in a file (ex: two name servers in /etc/resolve.conf). It evaluates based on the value of the 2nd occurrence, which may cause issues since it could change both instances.  
 - It can't deal with min/max values. It only takes exact - ex if PASS_MAX_DAYS is set to 60 in /etc/login.defs, it will warn if checking for 50 
 - It will not install a service or rpm that should be present but isn't. It will warn. 
+- It will add option/value pairs to the correct location in a config file, Ex below an existing line. Therefore there is an optimal order of config checks, prerequisites first. 
+  - If the prerequite config (for positioning) does not exist, it will not add the option/value pair. 
+  - It will not reposition an existing option/value pair. 
 
 Usage and Example:
 
