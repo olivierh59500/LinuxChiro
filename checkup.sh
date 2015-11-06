@@ -508,7 +508,7 @@ do
 			if [[ $MAKECHANGES -eq $Yes ]]; then
 			
 			        #Check to see if there was a required placement line and if it existed 
-				if [[ "$textoflinetoaddafter" = "none" ]] && [[ "$LineToAddAfter" -ne "1" ]]; then
+				if [[ "$textoflinetoaddafter" != "none" ]] && [[ "$LineToAddAfter" -ne "1" ]]; then
 					MAKETHISCHANGE=$No
 					echo_text_function "$WarningText We can not add $option to $filename becuase the required line of $textoflinetoaddafter does not exist" "WARNING"
 					#We should set a flag to indicate that the script may need to rerun - the required line might be added with a later check
