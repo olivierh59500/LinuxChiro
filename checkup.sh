@@ -13,7 +13,11 @@ OPERMODE=$1
 #We hard code the following options for safety, in the future we might allow changing via commnad line
 TURNOFFBACKUPS=$No         #Should we turn off backups? 
 PRESCRIBECOMMANDSONLY=$Yes #Do we only create a list of command to remediate the checks and run them later?  (No=run now,Yes=only create list)
-#--------- End Configs --------#
+#--------- End Configs --------#a
+
+#-------- Begin Initialize Variables ------#
+MAYNEEDTOBERERUN=$No
+#-------- End Initialize Variables ------#
 
 #Set Default value
 INATERMINAL=0
@@ -227,17 +231,11 @@ if [[ $MAKECHANGES -eq $Yes ]]; then
 	#Create file to store commands that should be run
 	PRESCRIBECOMMANDFILE="commandstorun.lis"
 	
-	#Prime the file 
-	echo "#!/bin/bash" > $PRESCRIBEFOLDER/$PRESCRIBECOMMANDFILE
-
 	#Create Directory for Undo File
 	UNDOFOLDER=$(mktemp -d)
 	
 	#Create file to store commands to undo changes
 	UNDOCOMMANDFILE="undocommands.lis"
-	
-	#Prime the undo file 
-	echo "#!/bin/bash" > $UNDOFOLDER/$UNDOCOMMANDFILE
 	
 	if [[ $TURNOFFBACKUPS -eq $No ]]; then
 		#Add the BACKUPFOLDER to the PRESCRIBECOMMANDFILE
@@ -400,63 +398,65 @@ system_auth="/etc/pam.d/system-auth"
 httpd_conf="/etc/httpd/conf/httpd.conf"
 ssl_conf="/etc/httpd/conf.d/ssl.conf"
 php_conf="/etc/php.ini"
+rpmpkgs_conf="/etc/logrotate.d/rpm"
 
 #Configure some things
 #format:
-#filename,option,value,SeparatorOfOptionAndValueInConf,command_to_set_active_value,flag_for_command_to_set_active_value,service_to_reload,reason_for_change
+#filename,option,value,SeparatorOfOptionAndValueInConf,command_to_set_active_value,flag_for_command_to_set_active_value,service_to_reload,line_to_add_after,reason_for_change
 Conf_LOOP=(
-"$sysctlfile,net.ipv4.tcp_max_syn_backlog,4096,=,sysctl,-w,none,sysctl_tuning"
-"$sysctlfile,net.ipv4.conf.all.rp_filter,1,=,sysctl,-w,none,sysctl_tuning"
-"$sysctlfile,net.ipv4.conf.all.accept_source_route,0,=,sysctl,-w,none,sysctl_tuning"
-"$sysctlfile,net.ipv4.conf.all.accept_redirects,0,=,sysctl,-w,none,sysctl_tuning"
-"$sysctlfile,net.ipv4.conf.all.secure_redirects,0,=,sysctl,-w,none,sysctl_tuning"
-"$sysctlfile,net.ipv4.conf.default.accept_redirects,0,=,sysctl,-w,none,sysctl_tuning"
-"$sysctlfile,net.ipv4.conf.default.secure_redirects,0,=,sysctl,-w,none,sysctl_tuning"
-"$sysctlfile,net.ipv4.conf.all.send_redirects,0,=,sysctl,-w,none,sysctl_tuning"
-"$sysctlfile,net.ipv4.conf.default.send_redirects,0,=,sysctl,-w,none,sysctl_tuning"
-"$sysctlfile,net.ipv4.tcp_syncookies,1,=,sysctl,-w,none,sysctl_tuning"
-"$sysctlfile,net.ipv4.icmp_echo_ignore_broadcasts,1,=,sysctl,-w,none,sysctl_tuning"
-"$sysctlfile,net.ipv4.icmp_ignore_bogus_error_responses,1,=,sysctl,-w,none,sysctl_tuning"
-"$sysctlfile,net.ipv4.ip_forward,0,=,sysctl,-w,none,sysctl_tuning"
-"$sysctlfile,net.ipv4.conf.all.log_martians,1,=,sysctl,-w,none,sysctl_tuning"
-"$sysctlfile,net.ipv4.conf.default.rp_filter,1,=,sysctl,-w,none,sysctl_tuning"
-"$sysctlfile,vm.swappiness,0,=,sysctl,-w,none,sysctl_tuning"
-"$sysctlfile,kernel.randomize_va_space,2,=,sysctl,-w,none,sysctl_tuning"
-"$sysctlfile,kernel.exec-shield,1,=,sysctl,-w,none,sysctl_tuning"
-"$ssh_client_config,HashKnownHosts,yes, ,none,none,none,ssh_client_tuning"
-"$ssh_client_config,RhostsAuthentication,no, ,none,none,none,ssh_client_tuning"
-"$ssh_client_config,HostbasedAuthentication,no, ,none,none,none,ssh_client_tuning"
-"$ssh_client_config,Protocol,2, ,none,none,none,ssh_client_tuning"
-"$sshd_config,PrintLastLog,yes, ,none,none,$sshd_service,sshd_tuning"
-"$sshd_config,Protocol,2, ,none,none,$sshd_service,sshd_tuning"
-"$sshd_config,PermitRootLogin,no, ,none,none,$sshd_service,sshd_tuning"
-"$sshd_config,LoginGraceTime,30, ,none,none,$sshd_service,sshd_tuning"
-"$sshd_config,MaxAuthTries,2, ,none,none,$sshd_service,sshd_tuning"
-"$sshd_config,PermitEmptyPasswords,no, ,none,none,$sshd_service,sshd_tuning"
-"$sshd_config,HostbasedAuthentication,no, ,none,none,$sshd_service,sshd_tuning"
-"$sshd_config,IgnoreRhosts,yes, ,none,none,$sshd_service,sshd_tuning"
-"$sshd_config,MaxStartups,3, ,none,none,$sshd_service,sshd_tuning"
-"$sshd_config,AllowTcpForwarding,no, ,none,none,$sshd_service,sshd_tuning"
-"$sshd_config,ClientAliveInterval,3600, ,none,none,$sshd_service,sshd_tuning"
-"$sshd_config,ClientAliveCountMax,0, ,none,none,$sshd_service,sshd_tuning"
-"$sshd_config,PermitUserEnvironment,no, ,none,none,$sshd_service,sshd_tuning"
-"$sshd_config,Banner,/etc/issue, ,none,none,$sshd_service,sshd_tuning"
-"$etc_resolv_conf,search,scranton.edu, ,none,none,none,set_default_dns_search"
-"$logins_defs,PASS_MIN_LEN,14,\t,none,none,none,logins_defs_securing"
-"$logins_defs,PASS_MIN_DAYS,1,\t,none,none,none,logins_defs_securing"
-"$logins_defs,PASS_MAX_DAYS,60,\t,none,none,none,logins_defs_securing"
-"$logins_defs,PASS_WARN_AGE,7,\t,none,none,none,logins_defs_securing"
-"$logins_defs,ENCRYPT_METHOD,SHA512, ,none,none,none,logins_defs_securing"
-"$sysconfig_init,PROMPT,no,=,none,none,none,sysconfig_securing"
-"$httpd_conf,ServerSignature,Off, ,none,none,httpd,httpd_securing"
-"$httpd_conf,ServerTokens,Prod, ,none,none,httpd,httpd_securing"
-"$httpd_conf,TraceEnable,Off, ,none,none,httpd,httpd_securing"
-"$httpd_conf,Header always append,SAMEORIGIN, X-Frame-Options ,none,none,httpd,click_jacking_protection"
-"$ssl_conf,Header always add,\"max-age=15768000\", Strict-Transport-Security ,none,none,httpd,HSTS_enforcement"
-"$ssl_conf,SSLProtocol,all -SSLv2 -SSLv3, ,none,none,httpd,ssl_secure_protocols"
-"$ssl_conf,SSLCipherSuite,HIGH:!aNULL:!MD5:!EXP, ,none,none,httpd,ssl_secure_ciphers"
-"$ssl_conf,SSLHonorCipherOrder,on, ,none,none,httpd,ssl_obey_server_ciphers"
-"$php_conf,expose_php,off, = ,none,none,none,php_securing"
+"$sysctlfile,net.ipv4.tcp_max_syn_backlog,4096,=,sysctl,-w,none,none,sysctl_tuning"
+"$sysctlfile,net.ipv4.conf.all.rp_filter,1,=,sysctl,-w,none,none,sysctl_tuning"
+"$sysctlfile,net.ipv4.conf.all.accept_source_route,0,=,sysctl,-w,none,none,sysctl_tuning"
+"$sysctlfile,net.ipv4.conf.all.accept_redirects,0,=,sysctl,-w,none,none,sysctl_tuning"
+"$sysctlfile,net.ipv4.conf.all.secure_redirects,0,=,sysctl,-w,none,none,sysctl_tuning"
+"$sysctlfile,net.ipv4.conf.default.accept_redirects,0,=,sysctl,-w,none,none,sysctl_tuning"
+"$sysctlfile,net.ipv4.conf.default.secure_redirects,0,=,sysctl,-w,none,none,sysctl_tuning"
+"$sysctlfile,net.ipv4.conf.all.send_redirects,0,=,sysctl,-w,none,none,sysctl_tuning"
+"$sysctlfile,net.ipv4.conf.default.send_redirects,0,=,sysctl,-w,none,none,sysctl_tuning"
+"$sysctlfile,net.ipv4.tcp_syncookies,1,=,sysctl,-w,none,none,sysctl_tuning"
+"$sysctlfile,net.ipv4.icmp_echo_ignore_broadcasts,1,=,sysctl,-w,none,none,sysctl_tuning"
+"$sysctlfile,net.ipv4.icmp_ignore_bogus_error_responses,1,=,sysctl,-w,none,none,sysctl_tuning"
+"$sysctlfile,net.ipv4.ip_forward,0,=,sysctl,-w,none,none,sysctl_tuning"
+"$sysctlfile,net.ipv4.conf.all.log_martians,1,=,sysctl,-w,none,none,sysctl_tuning"
+"$sysctlfile,net.ipv4.conf.default.rp_filter,1,=,sysctl,-w,none,none,sysctl_tuning"
+"$sysctlfile,vm.swappiness,0,=,sysctl,-w,none,none,sysctl_tuning"
+"$sysctlfile,kernel.randomize_va_space,2,=,sysctl,-w,none,none,sysctl_tuning"
+"$sysctlfile,kernel.exec-shield,1,=,sysctl,-w,none,none,sysctl_tuning"
+"$ssh_client_config,HashKnownHosts,yes, ,none,none,none,none,ssh_client_tuning"
+"$ssh_client_config,RhostsAuthentication,no, ,none,none,none,none,ssh_client_tuning"
+"$ssh_client_config,HostbasedAuthentication,no, ,none,none,none,none,ssh_client_tuning"
+"$ssh_client_config,Protocol,2, ,none,none,none,none,ssh_client_tuning"
+"$sshd_config,PrintLastLog,yes, ,none,none,$sshd_service,none,sshd_tuning"
+"$sshd_config,Protocol,2, ,none,none,$sshd_service,none,sshd_tuning"
+"$sshd_config,PermitRootLogin,no, ,none,none,$sshd_service,none,sshd_tuning"
+"$sshd_config,LoginGraceTime,30, ,none,none,$sshd_service,none,sshd_tuning"
+"$sshd_config,MaxAuthTries,2, ,none,none,$sshd_service,none,sshd_tuning"
+"$sshd_config,PermitEmptyPasswords,no, ,none,none,$sshd_service,none,sshd_tuning"
+"$sshd_config,HostbasedAuthentication,no, ,none,none,$sshd_service,none,sshd_tuning"
+"$sshd_config,IgnoreRhosts,yes, ,none,none,$sshd_service,none,sshd_tuning"
+"$sshd_config,MaxStartups,3, ,none,none,$sshd_service,^Subsystem,sshd_tuning"
+"$sshd_config,AllowTcpForwarding,no, ,none,none,$sshd_service,^MaxAuthTries,sshd_tuning"
+"$sshd_config,ClientAliveInterval,3600, ,none,none,$sshd_service,none,sshd_tuning"
+"$sshd_config,ClientAliveCountMax,0, ,none,none,$sshd_service,none,sshd_tuning"
+"$sshd_config,PermitUserEnvironment,no, ,none,none,$sshd_service,none,sshd_tuning"
+"$sshd_config,Banner,/etc/issue, ,none,none,$sshd_service,^PermitUserEnvironment,sshd_tuning"
+"$etc_resolv_conf,search,scranton.edu, ,none,none,none,none,set_default_dns_search"
+"$logins_defs,PASS_MIN_LEN,14,\t,none,none,none,none,logins_defs_securing"
+"$logins_defs,PASS_MIN_DAYS,1,\t,none,none,none,none,logins_defs_securing"
+"$logins_defs,PASS_MAX_DAYS,60,\t,none,none,none,none,logins_defs_securing"
+"$logins_defs,PASS_WARN_AGE,7,\t,none,none,none,none,logins_defs_securing"
+"$logins_defs,ENCRYPT_METHOD,SHA512, ,none,none,none,none,logins_defs_securing"
+"$sysconfig_init,PROMPT,no,=,none,none,none,none,sysconfig_securing"
+"$httpd_conf,ServerSignature,Off, ,none,none,httpd,none,httpd_securing"
+"$httpd_conf,ServerTokens,Prod, ,none,none,httpd,none,httpd_securing"
+"$httpd_conf,TraceEnable,Off, ,none,none,httpd,none,httpd_securing"
+"$httpd_conf,Header always append,SAMEORIGIN, X-Frame-Options ,none,none,httpd,none,click_jacking_protection"
+"$ssl_conf,Header always add,\"max-age=15768000\", Strict-Transport-Security ,none,none,httpd,^SSLHonorCipherOrder,HSTS_enforcement"
+"$ssl_conf,SSLProtocol,all -SSLv2 -SSLv3, ,none,none,httpd,none,ssl_secure_protocols"
+"$ssl_conf,SSLCipherSuite,HIGH:!aNULL:!MD5:!EXP, ,none,none,httpd,^SSLProtocol,ssl_secure_ciphers"
+"$ssl_conf,SSLHonorCipherOrder,on, ,none,none,httpd,^SSLCipherSuite,ssl_obey_server_ciphers"
+"$php_conf,expose_php,off, = ,none,none,none,none,php_securing"
+"$rpmpkgs_conf,create 0640,root root,\t,none,none,syslog,weekly,correcting_default_file_perms"
 )
 
 #TODO - check for duplicate entries of the same option (especially with different values)
@@ -469,8 +469,8 @@ do
 	command_to_set_active_value=$(echo $i | awk -F, '{print $5;}')
 	flag_to_set_active_value=$(echo $i | awk -F, '{print $6;}')
 	servive_to_reload=$(echo $i | awk -F, '{print $7;}')
-	reason=$(echo $i | awk -F, '{print $8;}')
-	
+	textoflinetoaddafter=$(echo $i | awk -F, '{print $8;}')
+	reason=$(echo $i | awk -F, '{print $9;}')
 	sudo stat $filename > /dev/null 2>&1
 	if [ $? -eq 0 ]; then #File Existance check
 	      
@@ -479,21 +479,44 @@ do
 		#How do we deal with leading and trailing white spaces and tabs??????!!!?	
 		currentsetting=$(sudo grep "^$option" $filename | tail -n1 | awk -F"$separator" '{$1=""; print $0}'| sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
 
+		#Get the line number of the current setting.
+		linenumofcurrentsetting=$(sudo grep -n "^$option" $filename | tail -n1 | grep -o '^[0-9]*')
+
 		#check for additional occurrences
 		if [[ $(sudo grep -c "^$option" $filename) -gt 1 ]]; then
 			echo_text_function "$WarningText There are multiple occurrences of $option in $filename - Only checking the last one" "WARNING"
 		fi #Multiple occurrences check
+
+		#Check to see if the option/value pair follow a specified line(if applicable) 
+		LineToAddAfter=""
+		if [[ "$textoflinetoaddafter" != "none" ]]; then
+			if [[ $(sudo grep "$textoflinetoaddafter" $filename) ]]; then	
+				LineToAddAfter=$(sudo grep -n "$textoflinetoaddafter" $filename | tail -n1 | grep -o '^[0-9]*')
+				LineToAddAfter=$((LineToAddAfter+1))
+			fi	
+		fi #textoflinetoaddafter check fi
 		
 		if [[ "$currentsetting" != "$value" ]]; then
 			if [[ -z "$currentsetting" ]]; then
 				echo_text_function "$IncorrectText $option in $filename is not set, it should be $value" "OFF"
 			else #currentsetting else 
 				echo_text_function "$IncorrectText $option in $filename is set to $currentsetting, it should be $value" "OFF"
+				#We may want to add some checking/notification of the placement here as well 
 			fi #currentsetting end if 
+
 			#Make Changes
 			if [[ $MAKECHANGES -eq $Yes ]]; then
 			
-				interactive_check_function "Would you like to set $option to $value in $filename? [y/n]"
+			        #Check to see if there was a required placement line and if it existed 
+				if [[ "$textoflinetoaddafter" = "none" ]] && [[ "$LineToAddAfter" -ne "1" ]]; then
+					MAKETHISCHANGE=$No
+					echo_text_function "$WarningText We can not add $option to $filename becuase the required line of $textoflinetoaddafter does not exist" "WARNING"
+					#We should set a flag to indicate that the script may need to rerun - the required line might be added with a later check
+					MAYNEEDTOBERERUN=$Yes
+				else 
+					interactive_check_function "Would you like to set $option to $value in $filename? [y/n]"
+                        	fi
+
 				
 				if [[ $MAKETHISCHANGE -eq $Yes ]]; then
 					if [[ $TURNOFFBACKUPS -eq $No ]]; then
@@ -501,17 +524,23 @@ do
 						BACKUPEXTENTION="$(date +"%m-%d-%Y-%H:%M:%S:%N")${option//[[:blank:]]/}"
 					else 
 						BACKUPEXTENTION=""
-					fi 
+					fi #TURNOFFBACKUPS if 
 					
-					#Modify the current setting or add it
+					#Modify the current setting or add it to the file
 					if [[ "$currentsetting" != "" ]]; then
 						#Correct the existing value for the option
 						execute_command_function "sudo sed -i$BACKUPEXTENTION '/^$option/s/$separator$currentsetting/$separator$value/gi' $filename" "sudo sed -i '/^$option/s/$separator$value/$separator$currentsetting/gi' $filename" "sudo mv $filename$BACKUPEXTENTION \$BACKUPFOLDER"
 						echo_text_function "$ModificationText Changing existing entry - $option$separator$value in $filename" "CHANGED"
 					else #current setting blank check else
-						#Append the Option and Value to the conf file with the correct separator
-						execute_command_function "sudo sed -i$BACKUPEXTENTION '\$a$option$separator$value' $filename" "sudo sed -i '/^$option$separator$value/d' $filename" "sudo mv $filename$BACKUPEXTENTION \$BACKUPFOLDER"
-						echo_text_function "$ModificationText Adding new entry - $option$separator$value to $filename" "CHANGED"
+						if [[ "$LineToAddAfter" = "" ]]; then	
+							#Append the Option and Value to the conf file with the correct separator
+							execute_command_function "sudo sed -i$BACKUPEXTENTION '\$a$option$separator$value' $filename" "sudo sed -i '/^$option$separator$value/d' $filename" "sudo mv $filename$BACKUPEXTENTION \$BACKUPFOLDER"
+							echo_text_function "$ModificationText Adding new entry - $option$separator$value to $filename at the end of the file" "CHANGED"
+						else #LineToAddAfter Else 
+							#Insert the Option and Value to the conf file with the correct separator at the correct location
+							execute_command_function "sudo sed -i$BACKUPEXTENTION '"$LineToAddAfter"i $option$separator$value' $filename" "sudo sed -i '/^$option$separator$value/d' $filename" "sudo mv $filename$BACKUPEXTENTION \$BACKUPFOLDER"
+							echo_text_function "$ModificationText Adding new entry - $option$separator$value to $filename at line number $LineToAddAfter" "CHANGED"
+						fi  #LineToAddAfter If
 					fi #current setting blank check else
 					
 					if [[ $command_to_set_active_value != "none" ]]; then #active value command check
@@ -527,11 +556,32 @@ do
 						echo_text_function "$ModificationText Reloading the $servive_to_reload service" "CHANGED"
 					fi #servive_to_reload
 				else #MAKETHISCHANGE
-					echo_text_function "$SkippedText $option left set to $value in $filename" "SKIPPED"
+					if [[ "$currentsetting" != "" ]]; then
+						echo_text_function "$SkippedText $option left set to $currentsetting in $filename" "SKIPPED"
+					else #$currentsetting"
+						echo_text_function "$SkippedText $option left unset in $filename" "SKIPPED"
+					fi #$currentsetting"
 				fi #MAKETHISCHANGE check
 			fi #MAKECHANGES check
 		else #currentsetting else
-			echo_text_function "$CorrectText $option has correct value of $value in $filename" "ON"
+			if [[ "$textoflinetoaddafter" = "none" ]]; then	
+				#There is no required line to check for
+				echo_text_function "$CorrectText $option has correct value of $value in $filename" "ON"
+			else #"$textoflinetoaddafter" = "none" 	
+				#There is a required line to follow that we need to check for
+				if [[ "$LineToAddAfter" -eq "" ]]; then 
+					#The required line that this option should follow does not exist
+			        	echo_text_function "$WarningText $option has correct value of $value in $filename but the required previous line of $textoflinetoaddafter is not present" "WARNING"	
+				else #"$LineToAddAfter" -eq "" 
+					#There is a required line that should precede this option
+					#We need to see if the option is in the correct place
+					if [[ "$LineToAddAfter" -eq "$linenumofcurrentsetting" ]]; then 
+				        	echo_text_function "$CorrectText $option has correct value of $value in $filename and follows the corret line of $textoflinetoaddafter" "ON"
+					else #line is in correct place
+				        	echo_text_function "$WarningText $option has correct value of $value in $filename but does not follow the correct line of $textoflinetoaddafter" "WARNING"
+					fi #line is in correct place
+				fi #"$LineToAddAfter" -eq "" 
+			fi #"$textoflinetoaddafter" = "none"
 		fi #currentsetting check
 	else #File Existance check 
 		echo_text_function "$WarningText $filename does not exist" "WARNING"
@@ -583,6 +633,7 @@ services_to_check=(
 "yum-updatesd,off,security"
 "crond,on,security"
 "iptables,on,security"
+"webmin,off,security"
 )
 
 for i in "${services_to_check[@]}"
@@ -642,37 +693,45 @@ done
 
 if [[ $MAKECHANGES -eq $Yes ]]; then
 	echo
-	
-	#Backups
-	if [[ $TURNOFFBACKUPS -eq $No ]]; then
-		#We made backups so we need to deal with them
-		echo_text_function "echo BACKUPFOLDER used is \$BACKUPFOLDER" >> $PRESCRIBEFOLDER/$PRESCRIBECOMMANDFILE
-	fi #TURNOFFBACKUPS check 
-	
-	#Check to see if we are actually suppose to run the commands 
-	if [[ $PRESCRIBECOMMANDSONLY -eq $No ]]; then
-		echo_text_function "Based on the PRESCRIBECOMMANDSONLY variable, we will run the following commands in $PRESCRIBEFOLDER/$PRESCRIBECOMMANDFILE"
-		sudo cat $PRESCRIBEFOLDER/$PRESCRIBECOMMANDFILE
-		sudo bash $PRESCRIBEFOLDER/$PRESCRIBECOMMANDFILE
-	else
-		echo_text_function "Based on the PRESCRIBECOMMANDSONLY variable, we will NOT run the following commands in $PRESCRIBEFOLDER/$PRESCRIBECOMMANDFILE"
-		sudo cat $PRESCRIBEFOLDER/$PRESCRIBECOMMANDFILE
-		echo
-	fi #PRESCRIBECOMMANDSONLY check 
+	sudo grep -q "sudo" $PRESCRIBEFOLDER/$PRESCRIBECOMMANDFILE #Probably a better way to check for this
+        if [ $? -eq 0 ]; then #Check to see if there are any commands to run
+		#Backups
+		if [[ $TURNOFFBACKUPS -eq $No ]]; then
+			#We made backups so we need to deal with them
+			echo "echo BACKUPFOLDER used is \$BACKUPFOLDER" >> $PRESCRIBEFOLDER/$PRESCRIBECOMMANDFILE
+		fi #TURNOFFBACKUPS check 
+		
+		#Check to see if we are actually suppose to run the commands 
+		if [[ $PRESCRIBECOMMANDSONLY -eq $No ]]; then
+			echo_text_function "Based on the PRESCRIBECOMMANDSONLY variable, we will run the following commands in $PRESCRIBEFOLDER/$PRESCRIBECOMMANDFILE"
+			sudo cat $PRESCRIBEFOLDER/$PRESCRIBECOMMANDFILE
+			source $PRESCRIBEFOLDER/$PRESCRIBECOMMANDFILE
+		else
+			echo_text_function "Based on the PRESCRIBECOMMANDSONLY variable, we will NOT run the following commands in $PRESCRIBEFOLDER/$PRESCRIBECOMMANDFILE"
+			sudo cat $PRESCRIBEFOLDER/$PRESCRIBECOMMANDFILE
+			echo
+		fi #PRESCRIBECOMMANDSONLY check 
 
-	#Clean up Command list 
-	sudo tar -zcf $PRESCRIBEFOLDER.tar.gz $PRESCRIBEFOLDER > /dev/null 2>&1
-	echo
-	echo_text_function "Compressed the Prescribed commands to $PRESCRIBEFOLDER.tar.gz"
-	echo
+		#Clean up Command list 
+		sudo tar -zcf $PRESCRIBEFOLDER.tar.gz $PRESCRIBEFOLDER > /dev/null 2>&1
+		echo_text_function "Compressed the Prescribed commands to $PRESCRIBEFOLDER.tar.gz"
+	else #Checking for any commands to run
+		echo_text_function "The script didn't find anything to change"
+		MAYNEEDTOBERERUN=$No	
+	fi #End check of any commands to run
 	
 	#Undos
-	echo_text_function "Here are the commands to undo the changes if you made them:"
-	sudo cat $UNDOFOLDER/$UNDOCOMMANDFILE
-	sudo tar -zcf $UNDOFOLDER.tar.gz $UNDOFOLDER > /dev/null 2>&1
-	echo_text_function "Commands to undo changes are available in $UNDOFOLDER.tar.gz"
-	
-fi #MAKECHANGES check 
+	if [[ -e $UNDOFOLDER/$UNDOCOMMANDFILE ]]; then 
+		echo_text_function "Here are the commands to undo the changes if you made them:"
+		sudo cat $UNDOFOLDER/$UNDOCOMMANDFILE
+		sudo tar -zcf $UNDOFOLDER.tar.gz $UNDOFOLDER > /dev/null 2>&1
+		echo_text_function "Commands to undo changes are available in $UNDOFOLDER.tar.gz"
+        fi #existence of  undo file check
 
+	#Very rudimentary check and notififcation that we may need to run the script again 
+        if [[ $MAYNEEDTOBERERUN -eq $Yes ]]; then
+		 echo_text_function "We might need to run this script again because required lines may have been added"
+	fi #MAYNEEDTOBERERUN Check
+fi #MAKECHANGES check 
 echo
 exit $Success
