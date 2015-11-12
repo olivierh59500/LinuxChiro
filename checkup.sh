@@ -508,7 +508,6 @@ do
 			if [[ $MAKECHANGES -eq $Yes ]]; then
 			
 			        #Check to see if there was a required placement line and if it existed 
-				echo "LineToAddAfter=$LineToAddAfter"
 				if [ $LineToAddAfter -lt 2 ]; then
 					MAKETHISCHANGE=$No
 					echo_text_function "$WarningText We can not add $option to $filename becuase the required line of $textoflinetoaddafter does not exist" "WARNING"
