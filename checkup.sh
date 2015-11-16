@@ -398,7 +398,8 @@ system_auth="/etc/pam.d/system-auth"
 httpd_conf="/etc/httpd/conf/httpd.conf"
 ssl_conf="/etc/httpd/conf.d/ssl.conf"
 php_conf="/etc/php.ini"
-rpmpkgs_conf="/etc/logrotate.d/rpm"
+rpmpkgslog_conf="/etc/logrotate.d/rpm"
+network_conf="/etc/sysconfig/network"
 
 #Configure some things
 #format:
@@ -456,7 +457,8 @@ Conf_LOOP=(
 "$ssl_conf,SSLCipherSuite,HIGH:!aNULL:!MD5:!EXP, ,none,none,httpd,^SSLProtocol,ssl_secure_ciphers"
 "$ssl_conf,SSLHonorCipherOrder,on, ,none,none,httpd,^SSLCipherSuite,ssl_obey_server_ciphers"
 "$php_conf,expose_php,off, = ,none,none,none,none,php_securing"
-"$rpmpkgs_conf,create 0640,root root,\t,none,none,syslog,weekly,correcting_default_file_perms"
+"$rpmpkgslog_conf,create 0640,root root,\t,none,none,syslog,weekly,correcting_default_file_perms"
+"$network_conf,NOZEROCONF,yes,=,none,none,network,none,disabling_zeroconf"
 )
 
 #TODO - check for duplicate entries of the same option (especially with different values)
