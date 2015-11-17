@@ -190,7 +190,7 @@ interactive)
 	echo
 	echo "audit-all   - make no changes, notify status of all checks"
 	echo "audit-on    - make no changes, notify status of only implemented checks"
- 	echo "audit-off   - make no changes, notify status of only non-implemented checks (and warnings)"
+	echo "audit-off   - make no changes, notify status of only non-implemented checks (and warnings)"
 	echo "fix-quiet   - make changes, no notifications"
 	echo "fix-notify  - make changes, with notifications of changes made"
 	echo "interactive - step through each check, give status of all and prompt to fix (if needed)"
@@ -241,7 +241,7 @@ execute_command_function () { #Start of execute_command_function
 	fi #end of check for backup files to clean up 
 } #End of execute_command_function 
 
-interactive_check_function () {
+interactive_check_function () { #Function to determine if we should prompt for each change 
 	QuestionToDisplay=$1
 	
 	if [[ "$INTERACTIVECHANGES" -eq "$Yes" ]]; then #INTERACTIVE CHANGES Check 
@@ -250,13 +250,14 @@ interactive_check_function () {
 			case $yn in
 				[Yy]* ) MAKETHISCHANGE=$Yes; break;;
 				[Nn]* ) MAKETHISCHANGE=$No; break;;
+				"" ) MAKETHISCHANGE=$No; break;;
 				* ) echo 'Please answer "y" or "n".';;
 			esac
 		done
 	else #INTERACTIVE CHANGES Check
 		MAKETHISCHANGE=$Yes
 	fi #INTERACTIVE CHANGES Check
-}
+} #End of interactive_check_function
 
 FILEPERMCHANGECOMMAND="chmod"
 FILEOWNSHIPCHANGECOMMAND="chown"
@@ -320,17 +321,16 @@ file_and_perm_array=(
 
 for i in "${file_and_perm_array[@]}"
 do
-	operation=$(echo $i | awk -F, '{print $1;}')
-	file=$(echo $i | awk -F, '{print $2;}')
-	correctsetting=$(echo $i | awk -F, '{print $3;}')
-	reason=$(echo $i | awk -F, '{print $4;}')
-	#Check the file or directory exists
-	sudo stat $file > /dev/null 2>&1
-	if [ $? -eq 0 ]; then
-		if [[ $operation = "$FILEPERMCHANGECOMMAND" ]]; then #operation check
-			filevaluecheck=$(sudo stat -c %a $file)
-		elif [[ $operation = "$FILEOWNSHIPCHANGECOMMAND" ]]; then #operation check
-			filevaluecheck=$(sudo stat -c %U:%G $file)
+	operation="$(echo $i | awk -F, '{print $1;}')"
+	file="$(echo $i | awk -F, '{print $2;}')"
+	correctsetting="$(echo $i | awk -F, '{print $3;}')"
+	reason="$(echo $i | awk -F, '{print $4;}')"
+	
+	if [ ! $(sudo stat $file > /dev/null 2>&1) ]; then #Check the file or directory exists
+		if [[ "$operation" = "$FILEPERMCHANGECOMMAND" ]]; then #operation check
+			filevaluecheck="$(sudo stat -c %a $file)"
+		elif [[ "$operation" = "$FILEOWNSHIPCHANGECOMMAND" ]]; then #operation check
+			filevaluecheck="$(sudo stat -c %U:%G $file)"
 		else #operation check catch all 
 		        echo_text_function "Error processing filevaluecheck it was set to $filevaluecheck"; exit $FilevaluecheckError
 		fi #operation check
@@ -338,9 +338,9 @@ do
 		if [[ "$filevaluecheck" != "$correctsetting" ]]; then
 			echo_text_function "$IncorrectText $file is set to $filevaluecheck should be $correctsetting" "OFF"
 			#Make Chages
-			if [[ $MAKECHANGES -eq $Yes ]]; then
-				interactive_check_function "Would you like to $operation $file to $correctsetting [y/n]"
-				if [[ $MAKETHISCHANGE -eq $Yes ]]; then
+			if [[ "$MAKECHANGES" -eq "$Yes" ]]; then
+				interactive_check_function "Would you like to $operation $file to $correctsetting [y/N]"
+				if [[ "$MAKETHISCHANGE" -eq "$Yes" ]]; then
 					execute_command_function "sudo $operation $correctsetting $file" "sudo $operation $filevaluecheck $file"
 					#Check to notify of changes
 					echo_text_function "$ModificationText Setting $file to $correctsetting to $reason" "CHANGE"
@@ -351,7 +351,7 @@ do
 		else #correctsetting check
 			echo_text_function "$CorrectText $file is correctly set to $correctsetting" "ON"
 		fi #correctsetting check
-	else 
+	else #file existance check
 		echo_text_function "$WarningText $file does not exist" "OFF"
 	fi #file existance check
 done
@@ -486,7 +486,7 @@ do
 					#We should set a flag to indicate that the script may need to rerun - the required line might be added with a later check
 					MAYNEEDTOBERERUN=$Yes
 				else 
-					interactive_check_function "Would you like to set $option to $value in $filename? [y/n]"
+					interactive_check_function "Would you like to set $option to $value in $filename? [y/N]"
                         	fi
 
 				
@@ -634,7 +634,7 @@ do
 			echo_text_function "$IncorrectText $servicename Should be set to $correct_setting at boot" "OFF"
 			#Make Changes
 			if [[ $MAKECHANGES -eq $Yes ]]; then
-				interactive_check_function "Would you like to change $servicename's startup setting to $correct_setting [y/n]"
+				interactive_check_function "Would you like to change $servicename's startup setting to $correct_setting [y/N]"
 					if [[ $MAKETHISCHANGE -eq $Yes ]]; then
 						echo_text_function "$ModificationText Changing $servicename's boot setting to $correct_setting" "CHANGE"
 						execute_command_function "sudo /sbin/chkconfig $servicename $correct_setting" "sudo /sbin/chkconfig $servicename $actual_setting" ""
