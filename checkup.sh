@@ -74,8 +74,8 @@ echo_text_function () {
 #Command Check - "echo" is the only command we assume exists because we use it for the Command check announcement, it would be nice to run this through the echo_text_function at some point
 commands_needed_array=(echo chmod chown grep sed service stat rpm yum awk tail sysctl mktemp tar sudo mv date)
 
-for command in ${commands_needed_array[@]}; do
-	hash $command 2>/dev/null || { echo "$ErrorText - This script requires $command but it's not available."; exit $CommandsNeeded;}
+for command in "${commands_needed_array[@]}"; do
+	hash "$command" 2>/dev/null || { echo "$ErrorText - This script requires $command but it's not available."; exit $CommandsNeeded;}
 done #End command in ${commands_needed_array[@]}
 
 if [[ "$EUID" -eq "$RootEUID" ]]; then #Permissions and Path check - you should be running this script with a user that that has full sudo privs (non-root) but I'll tolerate running as root in a terminal
@@ -99,7 +99,7 @@ else #EUID else
 	fi #End Status code check
 fi #End EUID Check
 
-if [[ -f /etc/redhat-release ]]; then #Determine version of RedHat/Centos and if it is supported
+if [[ -f /etc/redhat-release ]]; then #Determine version of RedHat/Centos and if it is supported - this should be cleaned up 
 	if grep -qE "Red Hat|CentOS" /etc/redhat-release; then 
 		if grep -q "5." /etc/redhat-release; then
 			OSVER="5"
@@ -108,14 +108,14 @@ if [[ -f /etc/redhat-release ]]; then #Determine version of RedHat/Centos and if
 			OSVER="6"
 		fi 
 	fi 
-	if [[ "$OSVER" = "" ]]; then 
+	if [[ "$OSVER" = "" ]]; then #Check if we determined an OS Version 
 		echo_text_function "$ErrorText Could not determine OS Version"
 		exit $UndeterminedOS
-	fi 
-else 
+	fi #End OS Version determination check 
+else #else for main OS check
 	echo_text_function "$ErrorText You are using an unsupported OS. RedHat/Centos required"
 	exit $UnsupportedOS
-fi 
+fi #End OS Check 
 
 echo_text_function "OSVER is $OSVER - Supported"
 	
@@ -186,7 +186,7 @@ interactive)
 ;;
 
 *)
-	echo "Usage: $0 audit-all|audit-on|audit-off|fix-quiet|fix-notify|interactive"
+	echo "Usage: $0 audit-all | audit-on | audit-off | fix-quiet | fix-notify | interactive"
 	echo
 	echo "audit-all   - make no changes, notify status of all checks"
 	echo "audit-on    - make no changes, notify status of only implemented checks"
@@ -195,8 +195,8 @@ interactive)
 	echo "fix-notify  - make changes, with notifications of changes made"
 	echo "interactive - step through each check, give status of all and prompt to fix (if needed)"
 	echo
-	echo Example:
-	echo [user@server LinuxChiro]$ $0 audit-all 	
+	echo "Example:"
+	echo "[user@server LinuxChiro]$ $0 audit-all"
 	echo 
 	exit $UsagePrint
 esac
@@ -219,54 +219,50 @@ if [[ "$MAKECHANGES" -eq "$Yes" ]]; then #Check if we should make changes
 	
 	if [[ "$TURNOFFBACKUPS" -eq "$No" ]]; then #Check if we should turn off Backups
 		#Add the BACKUPFOLDER to the PRESCRIBECOMMANDFILE
-		echo "BACKUPFOLDER=\$(mktemp -d)" > $PRESCRIBEFOLDER/$PRESCRIBECOMMANDFILE
+		echo "BACKUPFOLDER=\$(mktemp -d)" > "$PRESCRIBEFOLDER/$PRESCRIBECOMMANDFILE"
 	fi #TURNOFFBACKUPS check 
 fi #MAKECHANGES Check
 
 #Define Functions 
-execute_command_function () {
+execute_command_function () { #Start of execute_command_function
 	CommandToExecute=$1
 	CommandToUndo=$2
 	CommandToCleanUpBackups=$3
 	
 	#Add the Command to Execute to the "Prescibe Commands, at the end we decide if we should run these or not
-	echo "$CommandToExecute" >> $PRESCRIBEFOLDER/$PRESCRIBECOMMANDFILE
+	echo "$CommandToExecute" >> "$PRESCRIBEFOLDER/$PRESCRIBECOMMANDFILE"
 	
-	if [[ -n "${CommandToUndo}" ]]; then #Add the command to undo change as long as it is populated 
-		echo "$CommandToUndo" >> $UNDOFOLDER/$UNDOCOMMANDFILE
+	if [[ -n "$CommandToUndo" ]]; then #Add the command to undo change as long as it is populated 
+		echo "$CommandToUndo" >> "$UNDOFOLDER/$UNDOCOMMANDFILE"
 	fi #End check of CommandToUndo variable 
 	
-	#Backup the existing Config as long as backups are turned on and a backup was produced 
-	if [[ "$TURNOFFBACKUPS" -eq "$No" && -n "${CommandToCleanUpBackups}" ]]; then
-		echo "$CommandToCleanUpBackups" >> $PRESCRIBEFOLDER/$PRESCRIBECOMMANDFILE
-	fi
+	if [[ "$TURNOFFBACKUPS" -eq "$No" && -n "$CommandToCleanUpBackups" ]]; then #if backups are on we need to clean up any files produces
+		echo "$CommandToCleanUpBackups" >> "$PRESCRIBEFOLDER/$PRESCRIBECOMMANDFILE"
+	fi #end of check for backup files to clean up 
 } #End of execute_command_function 
 
 interactive_check_function () {
-
 	QuestionToDisplay=$1
 	
-	if [[ $INTERACTIVECHANGES -eq $Yes ]]; then
+	if [[ "$INTERACTIVECHANGES" -eq "$Yes" ]]; then #INTERACTIVE CHANGES Check 
 		while true; do
-			read -p "$QuestionToDisplay" yn 
+			read -rp "$QuestionToDisplay" yn 
 			case $yn in
 				[Yy]* ) MAKETHISCHANGE=$Yes; break;;
 				[Nn]* ) MAKETHISCHANGE=$No; break;;
 				* ) echo 'Please answer "y" or "n".';;
 			esac
 		done
-	else
+	else #INTERACTIVE CHANGES Check
 		MAKETHISCHANGE=$Yes
 	fi #INTERACTIVE CHANGES Check
 }
-
 
 FILEPERMCHANGECOMMAND="chmod"
 FILEOWNSHIPCHANGECOMMAND="chown"
 
 #Correct File and folder permissions and ownership
-#format
-#operation,filename,correct value,reason
+#format - operation,filename,correct value,reason
 file_and_perm_array=(
 "$FILEPERMCHANGECOMMAND,/etc/inittab,600,disable_gui_login"
 "$FILEPERMCHANGECOMMAND,/etc/security/console.perms,600,disable_user_mounted_removable_file_systems"
@@ -667,26 +663,23 @@ do
 done
 
 
-if [[ $MAKECHANGES -eq $Yes ]]; then
+if [[ "$MAKECHANGES" -eq "$Yes" ]]; then
 	echo
-	sudo grep -q "sudo" $PRESCRIBEFOLDER/$PRESCRIBECOMMANDFILE #Probably a better way to check for this
-        if [ $? -eq 0 ]; then #Check to see if there are any commands to run
+        if [[ ! $(sudo grep -q "sudo" $PRESCRIBEFOLDER/$PRESCRIBECOMMANDFILE) ]]; then #Check to see if there are any commands to run - Probably a better way to do this
 		#Backups
-		if [[ $TURNOFFBACKUPS -eq $No ]]; then
-			#We made backups so we need to deal with them
-			echo "echo BACKUPFOLDER used is \$BACKUPFOLDER" >> $PRESCRIBEFOLDER/$PRESCRIBECOMMANDFILE
+		if [[ "$TURNOFFBACKUPS" -eq "$No" ]]; then #If we made backups, we need to deal with them	
+			echo "echo BACKUPFOLDER used is \$BACKUPFOLDER" >> "$PRESCRIBEFOLDER/$PRESCRIBECOMMANDFILE"
 		fi #TURNOFFBACKUPS check 
 		
-		#Check to see if we are actually suppose to run the commands 
-		if [[ $PRESCRIBECOMMANDSONLY -eq $No ]]; then
+		if [[ "$PRESCRIBECOMMANDSONLY" -eq "$No" ]]; then #Check to see if we should actually run the commands based on PRESCRIBECOMMANDSONLY
 			echo_text_function "Based on the PRESCRIBECOMMANDSONLY variable, we will run the following commands in $PRESCRIBEFOLDER/$PRESCRIBECOMMANDFILE"
-			sudo cat $PRESCRIBEFOLDER/$PRESCRIBECOMMANDFILE
+			sudo cat "$PRESCRIBEFOLDER/$PRESCRIBECOMMANDFILE"
 			source $PRESCRIBEFOLDER/$PRESCRIBECOMMANDFILE
-		else
+		else #Check to see if we should actually run the commands based on PRESCRIBECOMMANDSONLY
 			echo_text_function "Based on the PRESCRIBECOMMANDSONLY variable, we will NOT run the following commands in $PRESCRIBEFOLDER/$PRESCRIBECOMMANDFILE"
-			sudo cat $PRESCRIBEFOLDER/$PRESCRIBECOMMANDFILE
+			sudo cat "$PRESCRIBEFOLDER/$PRESCRIBECOMMANDFILE"
 			echo
-		fi #PRESCRIBECOMMANDSONLY check 
+		fi #End check to see if we should actually run the commands based on PRESCRIBECOMMANDSONLY
 
 		#Clean up Command list 
 		sudo tar -zcf $PRESCRIBEFOLDER.tar.gz $PRESCRIBEFOLDER > /dev/null 2>&1
@@ -699,13 +692,13 @@ if [[ $MAKECHANGES -eq $Yes ]]; then
 	#Undos
 	if [[ -e $UNDOFOLDER/$UNDOCOMMANDFILE ]]; then 
 		echo_text_function "Here are the commands to undo the changes if you made them:"
-		sudo cat $UNDOFOLDER/$UNDOCOMMANDFILE
+		sudo cat "$UNDOFOLDER/$UNDOCOMMANDFILE"
 		sudo tar -zcf $UNDOFOLDER.tar.gz $UNDOFOLDER > /dev/null 2>&1
 		echo_text_function "Commands to undo changes are available in $UNDOFOLDER.tar.gz"
         fi #existence of  undo file check
 
 	#Very rudimentary check and notififcation that we may need to run the script again 
-        if [[ $MAYNEEDTOBERERUN -eq $Yes ]]; then
+        if [[ "$MAYNEEDTOBERERUN" -eq "$Yes" ]]; then
 		 echo_text_function "We might need to run this script again because required lines may have been added"
 	fi #MAYNEEDTOBERERUN Check
 fi #MAKECHANGES check 
