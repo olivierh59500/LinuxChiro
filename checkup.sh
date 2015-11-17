@@ -13,20 +13,15 @@ OPERMODE=$1
 #We hard code the following options for safety, in the future we might allow changing via commnad line
 TURNOFFBACKUPS=$No         #Should we turn off backups? 
 PRESCRIBECOMMANDSONLY=$Yes #Do we only create a list of command to remediate the checks and run them later?  (No=run now,Yes=only create list)
-#--------- End Configs --------#a
+#--------- End Configs --------#
 
-#-------- Begin Initialize Variables ------#
+#-------- Begin Initialize Default Values ------#
 MAYNEEDTOBERERUN=$No
-#-------- End Initialize Variables ------#
+INATERMINAL=$No
+RootEUID=0
+#-------- End Initialize Default Values ------#
 
-#Set Default value
-INATERMINAL=0
-#Check for a terminal
-if [[ -t $Yes ]]; then
-	INATERMINAL=$Yes
-fi #End Terminal Check
-
-#Set Exit Codes
+#-------- Begin Set Exit Codes ------#
 Success=0
 RootInNonTerminal=1
 PermissionsNeeded=2
@@ -36,66 +31,55 @@ CommandsNeeded=10
 UndeterminedOS=49
 UnsupportedOS=50
 FilevaluecheckError=51
+#-------- End Set Exit Codes ------#
 
-#Set Text 
-#these should all be 12 characters
+#-------- Begin Set Text - these should all be 12 characters ------#
 WarningText="!!!Warning  "
 ModificationText="+++Changing "
 IncorrectText="---Incorrect"
 CorrectText="OK          "
 SkippedText="Skipped     "
 ErrorText="ERROR       "
+#-------- End Set Text ------#
+
+if [[ -t $Yes ]]; then #Check for a terminal
+	INATERMINAL=$Yes
+fi #End Terminal Check
 
 echo_text_function () {
 	TextToEcho=$1
 	TYPEOFNOTIFICATION=$2
 	
-	#Rather than checking the notification setting for each echo, we centralize it here and default to echoing
-	#We should deal with the "WARNING" and "SKIPPED" cases as well
-	case "$TYPEOFNOTIFICATION" in
+	case "$TYPEOFNOTIFICATION" in #Rather than checking the notification setting for each echo, we centralize it here (default to echoing)
 	ON)
-		#This is an ON notification, should we announce it?
-		if [[ $ONNOTIFICATIONS -eq $Yes ]]; then
+		if [[ "$ONNOTIFICATIONS" -eq "$Yes" ]]; then #This is an ON notification, should we announce it?
 			echo "$TextToEcho"
 		fi #ONNOTIFICATIONS check
 	;;
-	
 	OFF)
-		#This is an OFF notification, should we announce it?
-		if [[ $OFFNOTIFICATIONS -eq $Yes ]]; then
+		if [[ "$OFFNOTIFICATIONS" -eq "$Yes" ]]; then #This is an OFF notification, should we announce it?
 			echo "$TextToEcho"
 		fi #OFFNOTIFICATIONS check
 	;;
-	
 	CHANGE)
-		#This is a CHANGE notification, should we announce it?
-		if [[ NOTIFYCHANGES -eq $Yes ]]; then
+		if [[ "$NOTIFYCHANGES" -eq "$Yes" ]]; then #This is a CHANGE notification, should we announce it?
 			echo "$TextToEcho"
 		fi #NOTIFYCHANGES check
 	;;
-	
-	*)
-		#We'd like to avoid falling into this block
+	*) #We'd like to avoid falling into this block
 		echo "$TextToEcho"
-	esac
+	esac #End - case "$TYPEOFNOTIFICATION"
 }
 
 #Command Check - "echo" is the only command we assume exists because we use it for the Command check announcement, it would be nice to run this through the echo_text_function at some point
-#format
-#command
 commands_needed_array=(echo chmod chown grep sed service stat rpm yum awk tail sysctl mktemp tar sudo mv date)
 
-for command in ${commands_needed_array[@]}
-do
+for command in ${commands_needed_array[@]}; do
 	hash $command 2>/dev/null || { echo "$ErrorText - This script requires $command but it's not available."; exit $CommandsNeeded;}
-done
+done #End command in ${commands_needed_array[@]}
 
-#Permissions and Path check - you should be running this script with a user
-#that that has full sudo privs (non-root) but I'll tolerate running as root in a terminal
-RootEUID=0
-if [[ $EUID -eq $RootEUID ]]; then
-   #Check for a terminal
-    if [[ $INATERMINAL -eq $Yes ]]; then
+if [[ "$EUID" -eq "$RootEUID" ]]; then #Permissions and Path check - you should be running this script with a user that that has full sudo privs (non-root) but I'll tolerate running as root in a terminal
+    if [[ "$INATERMINAL" -eq "$Yes" ]]; then  #Check for a terminal
 		echo_text_function "Ok I'll let you run this as root in a terminal"
 	else #INATERMINAL else
 		echo_text_function "You really shouldn't be running as root in a non-terminal. Exiting"
@@ -107,8 +91,7 @@ else #EUID else
     #I'll start to keep a list of what commands we need to sudo without a passworda
     #Ideal /etc/sudoers line:
     #^\$USER ALL = NOPASSWD:/bin/ls,/bin/tar,/bin/cat,/bin/grep,/usr/bin/stat,/bin/echo,/bin/sed,/bin/mv,/sbin/service,/sbin/chkconfig,/sbin/sysctl
-        sudo grep -q "^$USER ALL = NOPASSWD: ALL$" /etc/sudoers
-	if [ $? -eq 0 ]; then
+	if [[ ! $(sudo grep -q "^$USER ALL = NOPASSWD: ALL$" /etc/sudoers) ]]; then
 		echo_text_function "You are running as a non-root user with the correct sudo privs."
 	else #Status code else
 		echo_text_function "You don't have the required permissions to run this check"
@@ -116,9 +99,7 @@ else #EUID else
 	fi #End Status code check
 fi #End EUID Check
 
-
-#Determine version of RedHat/Centos and if it is supported - TODO, get a better way to do this
-if [[ -f /etc/redhat-release ]]; then
+if [[ -f /etc/redhat-release ]]; then #Determine version of RedHat/Centos and if it is supported
 	if grep -qE "Red Hat|CentOS" /etc/redhat-release; then 
 		if grep -q "5." /etc/redhat-release; then
 			OSVER="5"
@@ -127,7 +108,7 @@ if [[ -f /etc/redhat-release ]]; then
 			OSVER="6"
 		fi 
 	fi 
-	if [[ $OSVER = "" ]]; then 
+	if [[ "$OSVER" = "" ]]; then 
 		echo_text_function "$ErrorText Could not determine OS Version"
 		exit $UndeterminedOS
 	fi 
@@ -135,6 +116,7 @@ else
 	echo_text_function "$ErrorText You are using an unsupported OS. RedHat/Centos required"
 	exit $UnsupportedOS
 fi 
+
 echo_text_function "OSVER is $OSVER - Supported"
 	
 #Set default values for configs and give explanations
@@ -143,7 +125,6 @@ OFFNOTIFICATIONS=$No       #Should we notify things that aren't configured prope
 NOTIFYCHANGES=$No          #Should we notify of changes 
 MAKECHANGES=$No            #Should we make changes 
 INTERACTIVECHANGES=$No     #Should we the user to make select what changes to make 
-
 
 case "$OPERMODE" in
 audit-all)
@@ -157,7 +138,6 @@ audit-all)
 
 audit-on)
 	ONNOTIFICATIONS=$Yes   #In this case we want notifications of things that are on/implemented
-w
 	OFFNOTIFICATIONS=$No   #In this case we dont want notifications of things that are off/not implemented
 	NOTIFYCHANGES=$No      #Nothing should change in an audit
 	MAKECHANGES=$No        #Nothing should change in an audit
@@ -193,7 +173,7 @@ fix-notify)
 ;;
 
 interactive)
-	if [[ $INATERMINAL -eq $No ]]; then
+	if [[ "$INATERMINAL" -eq "$No" ]]; then #Check if in a terminal 
 		echo_text_function "$ErrorText - You need to be in a terminal to make interactive changes"
 		exit $TerminalNeededForInteractive
 	fi #End INATERMINAL Check
@@ -223,7 +203,7 @@ esac
 
 echo
 
-if [[ $MAKECHANGES -eq $Yes ]]; then
+if [[ "$MAKECHANGES" -eq "$Yes" ]]; then #Check if we should make changes 
 
 	#Create Directory for Commands that should be run
 	PRESCRIBEFOLDER=$(mktemp -d)
@@ -237,15 +217,11 @@ if [[ $MAKECHANGES -eq $Yes ]]; then
 	#Create file to store commands to undo changes
 	UNDOCOMMANDFILE="undocommands.lis"
 	
-	if [[ $TURNOFFBACKUPS -eq $No ]]; then
+	if [[ "$TURNOFFBACKUPS" -eq "$No" ]]; then #Check if we should turn off Backups
 		#Add the BACKUPFOLDER to the PRESCRIBECOMMANDFILE
 		echo "BACKUPFOLDER=\$(mktemp -d)" > $PRESCRIBEFOLDER/$PRESCRIBECOMMANDFILE
 	fi #TURNOFFBACKUPS check 
 fi #MAKECHANGES Check
-
-#Create a file to white list certain checks on hosts.
-#Still in the works but we'll remove the white listed changes from the prescribed commands. 
-##WHITELISTFILE="whitelist.lis"
 
 #Define Functions 
 execute_command_function () {
@@ -256,17 +232,15 @@ execute_command_function () {
 	#Add the Command to Execute to the "Prescibe Commands, at the end we decide if we should run these or not
 	echo "$CommandToExecute" >> $PRESCRIBEFOLDER/$PRESCRIBECOMMANDFILE
 	
-	#Add the command to undo change as long as it is populated 
-	if [[ -n "${CommandToUndo}" ]]; then
+	if [[ -n "${CommandToUndo}" ]]; then #Add the command to undo change as long as it is populated 
 		echo "$CommandToUndo" >> $UNDOFOLDER/$UNDOCOMMANDFILE
-	fi 
+	fi #End check of CommandToUndo variable 
 	
 	#Backup the existing Config as long as backups are turned on and a backup was produced 
-	if [[ $TURNOFFBACKUPS -eq $No && -n "${CommandToCleanUpBackups}" ]]; then
+	if [[ "$TURNOFFBACKUPS" -eq "$No" && -n "${CommandToCleanUpBackups}" ]]; then
 		echo "$CommandToCleanUpBackups" >> $PRESCRIBEFOLDER/$PRESCRIBECOMMANDFILE
 	fi
-	
-} 
+} #End of execute_command_function 
 
 interactive_check_function () {
 
