@@ -321,16 +321,16 @@ file_and_perm_array=(
 
 for i in "${file_and_perm_array[@]}"
 do
-	operation="$(echo $i | awk -F, '{print $1;}')"
-	file="$(echo $i | awk -F, '{print $2;}')"
-	correctsetting="$(echo $i | awk -F, '{print $3;}')"
-	reason="$(echo $i | awk -F, '{print $4;}')"
+	operation=$(echo "$i" | awk -F, '{print $1;}')
+	file=$(echo "$i" | awk -F, '{print $2;}')
+	correctsetting=$(echo "$i" | awk -F, '{print $3;}')
+	reason=$(echo "$i" | awk -F, '{print $4;}')
 	
-	if [ ! $(sudo stat $file > /dev/null 2>&1) ]; then #Check the file or directory exists
+	if [ ! $(sudo stat "$file" > /dev/null 2>&1) ]; then #Check the file or directory exists
 		if [[ "$operation" = "$FILEPERMCHANGECOMMAND" ]]; then #operation check
-			filevaluecheck="$(sudo stat -c %a $file)"
+			filevaluecheck=$(sudo stat -c %a "$file")
 		elif [[ "$operation" = "$FILEOWNSHIPCHANGECOMMAND" ]]; then #operation check
-			filevaluecheck="$(sudo stat -c %U:%G $file)"
+			filevaluecheck=$(sudo stat -c %U:%G "$file")
 		else #operation check catch all 
 		        echo_text_function "Error processing filevaluecheck it was set to $filevaluecheck"; exit $FilevaluecheckError
 		fi #operation check
@@ -434,36 +434,35 @@ Conf_LOOP=(
 #TODO - check for duplicate entries of the same option (especially with different values)
 for i in "${Conf_LOOP[@]}"
 do
-	filename=$(echo $i | awk -F, '{print $1;}')
-	option=$(echo $i | awk -F, '{print $2;}')
-	value=$(echo $i | awk -F, '{print $3;}')
-	separator=$(echo $i | awk -F, '{print $4;}')
-	command_to_set_active_value=$(echo $i | awk -F, '{print $5;}')
-	flag_to_set_active_value=$(echo $i | awk -F, '{print $6;}')
-	servive_to_reload=$(echo $i | awk -F, '{print $7;}')
-	textoflinetoaddafter=$(echo $i | awk -F, '{print $8;}')
-	reason=$(echo $i | awk -F, '{print $9;}')
-	sudo stat $filename > /dev/null 2>&1
-	if [ $? -eq 0 ]; then #File Existance check
-	      
+	filename=$(echo "$i" | awk -F, '{print $1;}')
+	option=$(echo "$i" | awk -F, '{print $2;}')
+	value=$(echo "$i" | awk -F, '{print $3;}')
+	separator=$(echo "$i" | awk -F, '{print $4;}')
+	command_to_set_active_value=$(echo "$i" | awk -F, '{print $5;}')
+	flag_to_set_active_value=$(echo "$i" | awk -F, '{print $6;}')
+	servive_to_reload=$(echo "$i" | awk -F, '{print $7;}')
+	textoflinetoaddafter=$(echo "$i" | awk -F, '{print $8;}')
+	reason=$(echo "$i" | awk -F, '{print $9;}')
+	
+	if [ ! $(sudo stat "$filename" > /dev/null 2>&1) ]; then #File Existance check
 		#We pipe to tail -n1 because there is a current limitation that we can only check one instance of the option, so we check the last. 
 		#"Usually" the last option is the one that is put into use. 
 		#How do we deal with leading and trailing white spaces and tabs??????!!!?	
-		currentsetting=$(sudo grep "^$option" $filename | tail -n1 | awk -F"$separator" '{$1=""; print $0}'| sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+		currentsetting=$(sudo grep "^$option" "$filename" | tail -n1 | awk -F"$separator" '{$1=""; print $0}'| sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
 
 		#Get the line number of the current setting.
-		linenumofcurrentsetting=$(sudo grep -n "^$option" $filename | tail -n1 | grep -o '^[0-9]*')
+		linenumofcurrentsetting=$(sudo grep -n "^$option" "$filename" | tail -n1 | grep -o '^[0-9]*')
 
 		#check for additional occurrences
-		if [[ $(sudo grep -c "^$option" $filename) -gt 1 ]]; then
+		if [[ $(sudo grep -c "^$option" "$filename") -gt 1 ]]; then
 			echo_text_function "$WarningText There are multiple occurrences of $option in $filename - Only checking the last one" "WARNING"
 		fi #Multiple occurrences check
 
 		#Check to see if the option/value pair follow a specified line(if applicable) 
 		LineToAddAfter=""
 		if [[ "$textoflinetoaddafter" != "none" ]]; then
-			if [[ $(sudo grep "$textoflinetoaddafter" $filename) ]]; then	
-				LineToAddAfter=$(sudo grep -n "$textoflinetoaddafter" $filename | tail -n1 | grep -o '^[0-9]*')
+			if [[ $(sudo grep "$textoflinetoaddafter" "$filename") ]]; then	
+				LineToAddAfter=$(sudo grep -n "$textoflinetoaddafter" "$filename" | tail -n1 | grep -o '^[0-9]*')
 				LineToAddAfter=$((LineToAddAfter+1))
 			fi	
 		fi #textoflinetoaddafter check fi
@@ -476,78 +475,67 @@ do
 				#We may want to add some checking/notification of the placement here as well 
 			fi #currentsetting end if 
 
-			#Make Changes
-			if [[ $MAKECHANGES -eq $Yes ]]; then
-			
-			        #Check to see if there was a required placement line and if it existed 
-				if [ $LineToAddAfter -lt 2 ]; then
+			if [[ "$MAKECHANGES" -eq "$Yes" ]]; then #Make Changes        
+				if [[ "$LineToAddAfter" -lt "2" ]]; then #Check to see if there was a required placement line and if it existed 
 					MAKETHISCHANGE=$No
 					echo_text_function "$WarningText We can not add $option to $filename becuase the required line of $textoflinetoaddafter does not exist" "WARNING"
 					#We should set a flag to indicate that the script may need to rerun - the required line might be added with a later check
 					MAYNEEDTOBERERUN=$Yes
-				else 
+				else #Check to see if there was a required placement line and if it existed
 					interactive_check_function "Would you like to set $option to $value in $filename? [y/N]"
-                        	fi
+                fi #Check to see if there was a required placement line and if it existed
 
-				
-				if [[ $MAKETHISCHANGE -eq $Yes ]]; then
-					if [[ $TURNOFFBACKUPS -eq $No ]]; then
+				if [[ "$MAKETHISCHANGE" -eq "$Yes" ]]; then #Check to see if we should make this specific change 
+					if [[ "$TURNOFFBACKUPS" -eq "$No" ]]; then #Are Backsups turned off 
 						#Generate a backup hash unique to each check
 						BACKUPEXTENTION="$(date +"%m-%d-%Y-%H:%M:%S:%N")${option//[[:blank:]]/}"
-					else 
+					else #Are Backsups turned off 
 						BACKUPEXTENTION=""
-					fi #TURNOFFBACKUPS if 
+					fi ##Are Backsups turned off 
 					
-					#Modify the current setting or add it to the file
-					if [[ "$currentsetting" != "" ]]; then
+					if [[ "$currentsetting" != "" ]]; then #Check if the current setting is blank
 						#Correct the existing value for the option
 						execute_command_function "sudo sed -i$BACKUPEXTENTION '/^$option/s/$separator$currentsetting/$separator$value/gi' $filename" "sudo sed -i '/^$option/s/$separator$value/$separator$currentsetting/gi' $filename" "sudo mv $filename$BACKUPEXTENTION \$BACKUPFOLDER"
 						echo_text_function "$ModificationText Changing existing entry - $option$separator$value in $filename" "CHANGED"
-					else #current setting blank check else
-						if [[ "$LineToAddAfter" = "" ]]; then	
+					else #Check if the current setting is blank
+						if [[ "$LineToAddAfter" = "" ]]; then #Check if there is a line to add the option after 
 							#Append the Option and Value to the conf file with the correct separator
 							execute_command_function "sudo sed -i$BACKUPEXTENTION '\$a$option$separator$value' $filename" "sudo sed -i '/^$option$separator$value/d' $filename" "sudo mv $filename$BACKUPEXTENTION \$BACKUPFOLDER"
 							echo_text_function "$ModificationText Adding new entry - $option$separator$value to $filename at the end of the file" "CHANGED"
-						else #LineToAddAfter Else 
+						else #Check if there is a line to add the option after 
 							#Insert the Option and Value to the conf file with the correct separator at the correct location
 							execute_command_function "sudo sed -i$BACKUPEXTENTION '"$LineToAddAfter"i $option$separator$value' $filename" "sudo sed -i '/^$option$separator$value/d' $filename" "sudo mv $filename$BACKUPEXTENTION \$BACKUPFOLDER"
 							echo_text_function "$ModificationText Adding new entry - $option$separator$value to $filename at line number $LineToAddAfter" "CHANGED"
-						fi  #LineToAddAfter If
-					fi #current setting blank check else
+						fi  #Check if there is a line to add the option after 
+					fi #Check if the current setting is blank
 					
-					if [[ $command_to_set_active_value != "none" ]]; then #active value command check
-					#If there is a need and way to set an active value, do it here
-						#Set active value
+					if [[ "$command_to_set_active_value" != "none" ]]; then #Check for a command to set active value
 						execute_command_function "sudo $command_to_set_active_value $flag_to_set_active_value $option$separator$value > /dev/null" "sudo $command_to_set_active_value $flag_to_set_active_value $option$separator$currentsetting > /dev/null" ""
 						echo_text_function "$ModificationText Making the new $option value active by running $command_to_set_active_value $flag_to_set_active_value $option$separator$value" "CHANGED"
-					fi #active value command check
+					fi #Check for a command to set active value
 					
-					if [[ "$servive_to_reload" != "none" ]]; then
-						#reload the appropriate service 
+					if [[ "$servive_to_reload" != "none" ]]; then #check if there is a service to reload 
 						execute_command_function "sudo service $servive_to_reload reload > /dev/null" "sudo service $servive_to_reload reload > /dev/null" ""
 						echo_text_function "$ModificationText Reloading the $servive_to_reload service" "CHANGED"
-					fi #servive_to_reload
-				else #MAKETHISCHANGE
-					if [[ "$currentsetting" != "" ]]; then
+					fi #check if there is a service to reload 
+				else #Check to see if we should make this specific change
+					if [[ "$currentsetting" != "" ]]; then #Check if the current setting is blank 
 						echo_text_function "$SkippedText $option left set to $currentsetting in $filename" "SKIPPED"
-					else #$currentsetting"
+					else #Check if the current setting is blank
 						echo_text_function "$SkippedText $option left unset in $filename" "SKIPPED"
-					fi #$currentsetting"
-				fi #MAKETHISCHANGE check
+					fi #Check if the current setting is blank
+				fi #Check to see if we should make this specific change
 			fi #MAKECHANGES check
 		else #currentsetting else
 			if [[ "$textoflinetoaddafter" = "none" ]]; then	
 				#There is no required line to check for
 				echo_text_function "$CorrectText $option has correct value of $value in $filename" "ON"
 			else #"$textoflinetoaddafter" = "none" 	
-				#There is a required line to follow that we need to check for
-				if [[ "$LineToAddAfter" -eq "" ]]; then 
+				if [[ "$LineToAddAfter" -eq "" ]]; then #There is a required line to follow that we need to check for
 					#The required line that this option should follow does not exist
 			        	echo_text_function "$WarningText $option has correct value of $value in $filename but the required previous line of $textoflinetoaddafter is not present" "WARNING"	
 				else #"$LineToAddAfter" -eq "" 
-					#There is a required line that should precede this option
-					#We need to see if the option is in the correct place
-					if [[ "$LineToAddAfter" -eq "$linenumofcurrentsetting" ]]; then 
+					if [[ "$LineToAddAfter" -eq "$linenumofcurrentsetting" ]]; then #There is a required line that should precede this option - We need to see if the option is in the correct place
 				        	echo_text_function "$CorrectText $option has correct value of $value in $filename and follows the corret line of $textoflinetoaddafter" "ON"
 					else #line is in correct place
 				        	echo_text_function "$WarningText $option has correct value of $value in $filename but does not follow the correct line of $textoflinetoaddafter" "WARNING"
@@ -610,22 +598,18 @@ services_to_check=(
 
 for i in "${services_to_check[@]}"
 do
-        servicename=$(echo $i | awk -F, '{print $1;}')
-        correct_setting=$(echo $i | awk -F, '{print $2;}')
-        reason=$(echo $i | awk -F, '{print $3;}')
+        servicename=$(echo "$i" | awk -F, '{print $1;}')
+        correct_setting=$(echo "$i" | awk -F, '{print $2;}')
+        reason=$(echo "$i" | awk -F, '{print $3;}')
 		
-        does_it_exist=$(sudo /sbin/chkconfig --list $servicename > /dev/null 2>&1)
-        if [ $? -eq 0 ]; then #does the service exist check
+        if [[ ! $(sudo /sbin/chkconfig --list "$servicename" > /dev/null 2>&1) ]]; then #does the service exist check
                 #If the service exists then we need to get its current start-up setting
                 #Note we are only checking run level 3
-                actual_setting=$(sudo /sbin/chkconfig --list $servicename | grep "3:" | awk '{print $5;}' | awk -F: '{print $2;}')
+                actual_setting=$(sudo /sbin/chkconfig --list "$servicename" | grep "3:" | awk '{print $5;}' | awk -F: '{print $2;}')
                 if [[ "$correct_setting" = "$actual_setting" ]]; then # correct setting check
                         echo_text_function "$CorrectText $servicename has the correct startup value of $actual_setting" "ON"
                 else #correct setting check
-						#The Service did not have the correct startup value
-                        #determine if the service is running
-                        sudo service $servicename status > /dev/null 2>&1
-                        if [[ $? -eq 0 ]]; then #Is_Service_Running check
+                        if [[ ! $(sudo service "$servicename" status > /dev/null 2>&1) ]]; then #Is_Service_Running check
                                 Is_Service_Running=$Yes
                         else #Is_Service_Running check
                                 Is_Service_Running=$No
@@ -633,7 +617,7 @@ do
 						
 			echo_text_function "$IncorrectText $servicename Should be set to $correct_setting at boot" "OFF"
 			#Make Changes
-			if [[ $MAKECHANGES -eq $Yes ]]; then
+			if [[ "$MAKECHANGES" -eq "$Yes" ]]; then
 				interactive_check_function "Would you like to change $servicename's startup setting to $correct_setting [y/N]"
 					if [[ $MAKETHISCHANGE -eq $Yes ]]; then
 						echo_text_function "$ModificationText Changing $servicename's boot setting to $correct_setting" "CHANGE"
@@ -665,7 +649,7 @@ done
 
 if [[ "$MAKECHANGES" -eq "$Yes" ]]; then
 	echo
-        if [[ ! $(sudo grep -q "sudo" $PRESCRIBEFOLDER/$PRESCRIBECOMMANDFILE) ]]; then #Check to see if there are any commands to run - Probably a better way to do this
+        if [[ ! $(sudo grep -q "sudo" "$PRESCRIBEFOLDER/$PRESCRIBECOMMANDFILE") ]]; then #Check to see if there are any commands to run - Probably a better way to do this
 		#Backups
 		if [[ "$TURNOFFBACKUPS" -eq "$No" ]]; then #If we made backups, we need to deal with them	
 			echo "echo BACKUPFOLDER used is \$BACKUPFOLDER" >> "$PRESCRIBEFOLDER/$PRESCRIBECOMMANDFILE"
@@ -682,7 +666,7 @@ if [[ "$MAKECHANGES" -eq "$Yes" ]]; then
 		fi #End check to see if we should actually run the commands based on PRESCRIBECOMMANDSONLY
 
 		#Clean up Command list 
-		sudo tar -zcf $PRESCRIBEFOLDER.tar.gz $PRESCRIBEFOLDER > /dev/null 2>&1
+		sudo tar -zcf "$PRESCRIBEFOLDER".tar.gz "$PRESCRIBEFOLDER" > /dev/null 2>&1
 		echo_text_function "Compressed the Prescribed commands to $PRESCRIBEFOLDER.tar.gz"
 	else #Checking for any commands to run
 		echo_text_function "The script didn't find anything to change"
@@ -693,7 +677,7 @@ if [[ "$MAKECHANGES" -eq "$Yes" ]]; then
 	if [[ -e $UNDOFOLDER/$UNDOCOMMANDFILE ]]; then 
 		echo_text_function "Here are the commands to undo the changes if you made them:"
 		sudo cat "$UNDOFOLDER/$UNDOCOMMANDFILE"
-		sudo tar -zcf $UNDOFOLDER.tar.gz $UNDOFOLDER > /dev/null 2>&1
+		sudo tar -zcf "$UNDOFOLDER".tar.gz "$UNDOFOLDER" > /dev/null 2>&1
 		echo_text_function "Commands to undo changes are available in $UNDOFOLDER.tar.gz"
         fi #existence of  undo file check
 
