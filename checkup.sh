@@ -91,7 +91,7 @@ else #EUID else
     #I'll start to keep a list of what commands we need to sudo without a passworda
     #Ideal /etc/sudoers line:
     #^\$USER ALL = NOPASSWD:/bin/ls,/bin/tar,/bin/cat,/bin/grep,/usr/bin/stat,/bin/echo,/bin/sed,/bin/mv,/sbin/service,/sbin/chkconfig,/sbin/sysctl
-	if [[ ! $(sudo grep -q "^$USER ALL = NOPASSWD: ALL$" /etc/sudoers) ]]; then
+	if sudo grep -q "^$USER ALL = NOPASSWD: ALL$" /etc/sudoers; then
 		echo_text_function "You are running as a non-root user with the correct sudo privs."
 	else #Status code else
 		echo_text_function "You don't have the required permissions to run this check"
@@ -319,14 +319,13 @@ file_and_perm_array=(
 "$FILEOWNSHIPCHANGECOMMAND,/boot/grub/grub.conf,root:root,secure_grub_conf"
 )
 
-for i in "${file_and_perm_array[@]}"
-do
+for i in "${file_and_perm_array[@]}"; do
 	operation=$(echo "$i" | awk -F, '{print $1;}')
 	file=$(echo "$i" | awk -F, '{print $2;}')
 	correctsetting=$(echo "$i" | awk -F, '{print $3;}')
 	reason=$(echo "$i" | awk -F, '{print $4;}')
 	
-	if [ ! $(sudo stat "$file" > /dev/null 2>&1) ]; then #Check the file or directory exists
+	if sudo stat "$file" > /dev/null 2>&1; then #Check the file or directory exists
 		if [[ "$operation" = "$FILEPERMCHANGECOMMAND" ]]; then #operation check
 			filevaluecheck=$(sudo stat -c %a "$file")
 		elif [[ "$operation" = "$FILEOWNSHIPCHANGECOMMAND" ]]; then #operation check
@@ -432,8 +431,7 @@ Conf_LOOP=(
 )
 
 #TODO - check for duplicate entries of the same option (especially with different values)
-for i in "${Conf_LOOP[@]}"
-do
+for i in "${Conf_LOOP[@]}"; do
 	filename=$(echo "$i" | awk -F, '{print $1;}')
 	option=$(echo "$i" | awk -F, '{print $2;}')
 	value=$(echo "$i" | awk -F, '{print $3;}')
@@ -444,7 +442,7 @@ do
 	textoflinetoaddafter=$(echo "$i" | awk -F, '{print $8;}')
 	reason=$(echo "$i" | awk -F, '{print $9;}')
 	
-	if [ ! $(sudo stat "$filename" > /dev/null 2>&1) ]; then #File Existance check
+	if sudo stat "$filename" > /dev/null 2>&1; then #File Existance check
 		#We pipe to tail -n1 because there is a current limitation that we can only check one instance of the option, so we check the last. 
 		#"Usually" the last option is the one that is put into use. 
 		#How do we deal with leading and trailing white spaces and tabs??????!!!?	
@@ -454,14 +452,14 @@ do
 		linenumofcurrentsetting=$(sudo grep -n "^$option" "$filename" | tail -n1 | grep -o '^[0-9]*')
 
 		#check for additional occurrences
-		if [[ $(sudo grep -c "^$option" "$filename") -gt 1 ]]; then
+		if [[ "$(sudo grep -c "^$option" "$filename")" -gt "1" ]]; then
 			echo_text_function "$WarningText There are multiple occurrences of $option in $filename - Only checking the last one" "WARNING"
 		fi #Multiple occurrences check
 
 		#Check to see if the option/value pair follow a specified line(if applicable) 
 		LineToAddAfter=""
 		if [[ "$textoflinetoaddafter" != "none" ]]; then
-			if [[ $(sudo grep "$textoflinetoaddafter" "$filename") ]]; then	
+			if sudo grep "$textoflinetoaddafter" "$filename"; then	
 				LineToAddAfter=$(sudo grep -n "$textoflinetoaddafter" "$filename" | tail -n1 | grep -o '^[0-9]*')
 				LineToAddAfter=$((LineToAddAfter+1))
 			fi	
@@ -596,60 +594,57 @@ services_to_check=(
 "webmin,off,security"
 )
 
-for i in "${services_to_check[@]}"
-do
-        servicename=$(echo "$i" | awk -F, '{print $1;}')
-        correct_setting=$(echo "$i" | awk -F, '{print $2;}')
-        reason=$(echo "$i" | awk -F, '{print $3;}')
-		
-        if [[ ! $(sudo /sbin/chkconfig --list "$servicename" > /dev/null 2>&1) ]]; then #does the service exist check
-                #If the service exists then we need to get its current start-up setting
-                #Note we are only checking run level 3
-                actual_setting=$(sudo /sbin/chkconfig --list "$servicename" | grep "3:" | awk '{print $5;}' | awk -F: '{print $2;}')
-                if [[ "$correct_setting" = "$actual_setting" ]]; then # correct setting check
-                        echo_text_function "$CorrectText $servicename has the correct startup value of $actual_setting" "ON"
-                else #correct setting check
-                        if [[ ! $(sudo service "$servicename" status > /dev/null 2>&1) ]]; then #Is_Service_Running check
-                                Is_Service_Running=$Yes
-                        else #Is_Service_Running check
-                                Is_Service_Running=$No
-                        fi #Is_Service_Running check
-						
+for i in "${services_to_check[@]}"; do
+	servicename=$(echo "$i" | awk -F, '{print $1;}')
+	correct_setting=$(echo "$i" | awk -F, '{print $2;}')
+	reason=$(echo "$i" | awk -F, '{print $3;}')
+	
+	if sudo /sbin/chkconfig --list "$servicename" > /dev/null 2>&1; then #does the service exist check
+		#If the service exists then we need to get its current start-up setting- Note we are only checking run level 3
+		actual_setting=$(sudo /sbin/chkconfig --list "$servicename" | grep "3:" | awk '{print $5;}' | awk -F: '{print $2;}')
+		if [[ "$correct_setting" = "$actual_setting" ]]; then # correct setting check
+				echo_text_function "$CorrectText $servicename has the correct startup value of $actual_setting" "ON"
+		else #correct setting check
+			if sudo service "$servicename" status > /dev/null 2>&1; then #Is_Service_Running check
+					Is_Service_Running=$Yes
+			else #Is_Service_Running check
+					Is_Service_Running=$No
+			fi #Is_Service_Running check
+			
 			echo_text_function "$IncorrectText $servicename Should be set to $correct_setting at boot" "OFF"
 			#Make Changes
-			if [[ "$MAKECHANGES" -eq "$Yes" ]]; then
+			if [[ "$MAKECHANGES" -eq "$Yes" ]]; then #Check if we should make changes 
 				interactive_check_function "Would you like to change $servicename's startup setting to $correct_setting [y/N]"
-					if [[ $MAKETHISCHANGE -eq $Yes ]]; then
-						echo_text_function "$ModificationText Changing $servicename's boot setting to $correct_setting" "CHANGE"
-						execute_command_function "sudo /sbin/chkconfig $servicename $correct_setting" "sudo /sbin/chkconfig $servicename $actual_setting" ""
+				if [[ "$MAKETHISCHANGE" -eq "$Yes" ]]; then #Check if we should make this specific change 
+					echo_text_function "$ModificationText Changing $servicename's boot setting to $correct_setting" "CHANGE"
+					execute_command_function "sudo /sbin/chkconfig $servicename $correct_setting" "sudo /sbin/chkconfig $servicename $actual_setting" ""
 
-						#Stop the service if it was running and needs to be stopped
-						#We can assume that if it was running it needs to be stopped because of the part of the "correct setting check" if block we are in 
-						if [[ "$Is_Service_Running" = "$Yes" ]]; then #was service running check
-							echo_text_function "$ModificationText Stopping $servicename because it was running" "CHANGE"
-							execute_command_function "sudo service $servicename stop > /dev/null" "sudo service $servicename start > /dev/null" ""
-						fi #was service running check
+					#Stop the service if it was running and needs to be stopped
+					#We can assume that if it was running it needs to be stopped because of the part of the "correct setting check" if block we are in 
+					if [[ "$Is_Service_Running" = "$Yes" ]]; then #was service running check
+						echo_text_function "$ModificationText Stopping $servicename because it was running" "CHANGE"
+						execute_command_function "sudo service $servicename stop > /dev/null" "sudo service $servicename start > /dev/null" ""
+					fi #was service running check
 
-				else #MAKETHISCHANGE else
-						echo_text_function "$SkippedText $servicename startup left set to $actual_setting" ""
-				fi #MAKETHISCHANGE else
-			fi #MAKECHANGES check
-                fi #correct setting check
+				else #Check if we should make this specific change
+					echo_text_function "$SkippedText $servicename startup left set to $actual_setting" ""
+				fi #Check if we should make this specific change
+			fi #Check if we should make changes 
+		fi #correct setting check
 
-        else #does the service exist check
-                #if it does not exist we see if it should
-                if [[ "$correct_setting" = "on" ]]; then # correct setting check
+	else #does the service exist check
+		if [[ "$correct_setting" = "on" ]]; then #check if the service should exist 
 			echo_text_function "$IncorrectText $servicename is not installed and it needs to be running, future versions of this script might offer to install it for you" "OFF"
-		else # correct setting check
+		else #check if the service should exist
 			echo_text_function "$CorrectText $servicename is not installed and that is fine because it should not be running" "ON"	
-		fi # correct setting check
-        fi #does the service exist check
+		fi #check if the service should exist
+	fi #does the service exist check
 done
 
 
-if [[ "$MAKECHANGES" -eq "$Yes" ]]; then
+if [[ "$MAKECHANGES" -eq "$Yes" ]]; then #Last MAKECHANGES
 	echo
-        if [[ ! $(sudo grep -q "sudo" "$PRESCRIBEFOLDER/$PRESCRIBECOMMANDFILE") ]]; then #Check to see if there are any commands to run - Probably a better way to do this
+        if sudo grep -q "sudo" "$PRESCRIBEFOLDER"/"$PRESCRIBECOMMANDFILE"; then #Check to see if there are any commands to run - Probably a better way to do this
 		#Backups
 		if [[ "$TURNOFFBACKUPS" -eq "$No" ]]; then #If we made backups, we need to deal with them	
 			echo "echo BACKUPFOLDER used is \$BACKUPFOLDER" >> "$PRESCRIBEFOLDER/$PRESCRIBECOMMANDFILE"
@@ -674,7 +669,7 @@ if [[ "$MAKECHANGES" -eq "$Yes" ]]; then
 	fi #End check of any commands to run
 	
 	#Undos
-	if [[ -e $UNDOFOLDER/$UNDOCOMMANDFILE ]]; then 
+	if [[ -e "$UNDOFOLDER"/"$UNDOCOMMANDFILE" ]]; then 
 		echo_text_function "Here are the commands to undo the changes if you made them:"
 		sudo cat "$UNDOFOLDER/$UNDOCOMMANDFILE"
 		sudo tar -zcf "$UNDOFOLDER".tar.gz "$UNDOFOLDER" > /dev/null 2>&1
@@ -685,6 +680,6 @@ if [[ "$MAKECHANGES" -eq "$Yes" ]]; then
         if [[ "$MAYNEEDTOBERERUN" -eq "$Yes" ]]; then
 		 echo_text_function "We might need to run this script again because required lines may have been added"
 	fi #MAYNEEDTOBERERUN Check
-fi #MAKECHANGES check 
+fi #Last MAKECHANGES
 echo
 exit $Success
