@@ -188,11 +188,11 @@ interactive)
 *)
 	echo "Usage: $0 audit-all | audit-on | audit-off | fix-quiet | fix-notify | interactive"
 	echo
-	echo "audit-all   - make no changes, notify status of all checks"
-	echo "audit-on    - make no changes, notify status of only implemented checks"
-	echo "audit-off   - make no changes, notify status of only non-implemented checks (and warnings)"
+	echo "audit-all   - make no changes, notify status of all"
+	echo "audit-on    - make no changes, notify status of correct settings"
+	echo "audit-off   - make no changes, notify status of incorrect settings"
 	echo "fix-quiet   - make changes, no notifications"
-	echo "fix-notify  - make changes, with notifications of changes made"
+	echo "fix-notify  - make changes, with notifications"
 	echo "interactive - step through each check, give status of all and prompt to fix (if needed)"
 	echo
 	echo "Example:"
@@ -315,7 +315,7 @@ file_and_perm_array=(
 "$FILEOWNSHIPCHANGECOMMAND,/lib,root:root,secure_lib"
 "$FILEOWNSHIPCHANGECOMMAND,/lib64,root:root,secure_lib64"
 "$FILEOWNSHIPCHANGECOMMAND,/usr/lib,root:root,secure_usr_lib"
-"$FILEOWNSHIPCHANGECOMMAND,/usr/lib,root:root,secure_usr_lib64"
+"$FILEOWNSHIPCHANGECOMMAND,/usr/lib64,root:root,secure_usr_lib64"
 "$FILEOWNSHIPCHANGECOMMAND,/boot/grub/grub.conf,root:root,secure_grub_conf"
 )
 
@@ -363,7 +363,6 @@ etc_resolv_conf="/etc/resolv.conf"
 sshd_service="sshd"
 logins_defs="/etc/login.defs"
 sysconfig_init="/etc/sysconfig/init"
-system_auth="/etc/pam.d/system-auth"
 httpd_conf="/etc/httpd/conf/httpd.conf"
 ssl_conf="/etc/httpd/conf.d/ssl.conf"
 php_conf="/etc/php.ini"
@@ -458,12 +457,13 @@ for i in "${Conf_LOOP[@]}"; do
 
 		#Check to see if the option/value pair follow a specified line(if applicable) 
 		LineToAddAfter=""
-		echo "Option = $option and textoflinetoaddafter=$textoflinetoaddafter"
+		#echo "Option = $option and textoflinetoaddafter=$textoflinetoaddafter"
 		if [[ "$textoflinetoaddafter" != "none" ]]; then #Check to if there is a required line to add the value after 
-			if sudo grep "$textoflinetoaddafter" "$filename"; then #Check if the required line exists 
+			if sudo grep -q "$textoflinetoaddafter" "$filename"; then #Check if the required line exists 
 				LineToAddAfter=$(sudo grep -n "$textoflinetoaddafter" "$filename" | tail -n1 | grep -o '^[0-9]*')
+				#When we want to add the funtionality to add a value BEFORE a specified line, we can skip the following increment
 				LineToAddAfter=$((LineToAddAfter+1))
-				echo "LineToAddAfter=$LineToAddAfter"
+				echo "============================== LineToAddAfter=$LineToAddAfter"
 			fi	#Check if the required line exists
 		fi #Check to if there is a required line to add the value after 
 		
@@ -655,7 +655,8 @@ if [[ "$MAKECHANGES" -eq "$Yes" ]]; then #Last MAKECHANGES
 		if [[ "$PRESCRIBECOMMANDSONLY" -eq "$No" ]]; then #Check to see if we should actually run the commands based on PRESCRIBECOMMANDSONLY
 			echo_text_function "Based on the PRESCRIBECOMMANDSONLY variable, we will run the following commands in $PRESCRIBEFOLDER/$PRESCRIBECOMMANDFILE"
 			sudo cat "$PRESCRIBEFOLDER/$PRESCRIBECOMMANDFILE"
-			source $PRESCRIBEFOLDER/$PRESCRIBECOMMANDFILE
+			# shellcheck source=/dev/null
+			source "$PRESCRIBEFOLDER"/"$PRESCRIBECOMMANDFILE"
 		else #Check to see if we should actually run the commands based on PRESCRIBECOMMANDSONLY
 			echo_text_function "Based on the PRESCRIBECOMMANDSONLY variable, we will NOT run the following commands in $PRESCRIBEFOLDER/$PRESCRIBECOMMANDFILE"
 			sudo cat "$PRESCRIBEFOLDER/$PRESCRIBECOMMANDFILE"
