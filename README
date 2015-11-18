@@ -3,55 +3,26 @@ LinuxChiro
 
 Posture checking and correcting for Linux
 
+Core functionality:
+- Examination  - Produce a report of things that need to be fixed, things already fixed or both 
+- Prescription - Produce a list of commands that can be run to resolve issues
+- Adjustment   - Fix issues interactively (locally) or non-interactively (locally/remotely) 
+- Insurance    - Backs up things before making each change and create a list of commands to run to easily undo changes
+
 What it checks/fixes:
- - Files/folders for permissions and/or ownership
- - Config files for correct option/value settings (separator can be specified)
+ - Files/folders for permissions and ownership
+ - Config files for correct option/value settings 
    - Ex: "PermitEmptyPasswords no" in sshd_config or "net.ipv4.tcp_syncookies = 1" in /etc/sysctl.conf
  - Service checks (Running and Startup Configs) 
-
-Core functionality:
-- Examination  - Audit things to be fixed, things already fixed or the status of all 
-- Prescription - Produces a list of what commands that should be run to resolve issues
-- Adjustment   - Fix issues interactively (locally) and non-interactively (locally/remotely) 
-- Consultation - This script will try to automatically fix as much as possible but it will suggestion things that aren't easy to fix (ex having /tmp on seperate partition) 
-- Insurance    - Backs up things before making each change and creates a list of commands to run to easily undo changes
-
-Other features:
-- Runs agentless remotely via a ssh (it won't take arguments when run remotely but you can hard code the option) 
-- Runs as non root and performs rudimentary checks for required sudo privs (better checks coming in future version).
-  - It will run as root locally (with a warning). 
-- Checks for the availability of required commands before running. 
-- Changes can be made immediately active when possible and added to the appropriate files for the next service (ex sshd) restart 
-- Results are compressed and saved on the host so that you can compare with past exams.
-- Configurable and (hopefully) descriptive exit codes
-- Provides brief/simple reason for making each change
-- All contained in one bash script
-
-Requirements:
+ 
+ Requirements:
 - Runs on RHEL/Centos 5/6 (could easily work on many others, the big difference between versions is the actual checks to perform)
 - Sudo privs without password (This can be trimmed down) 
 - /sbin in path (This can be trimmed down, the code will check for each needed commend but things like /sbin/service are needed)
 - Bash GNU bash, version 3.2.25 or later
 
-Major Feature additions in the works:
-- Ability to optionally source checks from external config files.
-- RPM Package checks (Combine with Service check?)
-- Ability to create and process a white list of changes that should not be made on a host 
-
-Current Limitations (some are by design) and notes:
-- It will not create files that don't exist but should (ex: /etc/cron.deny). It will warn.
-- It will not delete/remove options, files, services or packages that should not exist. 
-  - Ex Rhost Auth option from pam files, Cron log file "/etc/cron.daily/0logwatch", telnet-server package and rsh service
-  - This isn't a big deal for options in files because we can usually just set things to an appropriate value (ex null or 0) but some things need to be removed. 
-  - It will warn for packages and services that should not exist, currently there is not a way to indicate files and options that should not exist
-- It can't deal correctly with multiple occurrences of an option/value pair in a file (ex: two name servers in /etc/resolve.conf). It evaluates based on the value of the 2nd occurrence, which may cause issues since it could change both instances.  
-- It can't deal with min/max values. It only takes exact - ex if PASS_MAX_DAYS is set to 60 in /etc/login.defs, it will warn if checking for 50 
-- It will not install a service or rpm that should be present but isn't. It will warn. 
-- It will add option/value pairs to the correct location in a config file, Ex below an existing line. Therefore there is an optimal order of config checks, prerequisites first. 
-  - If the prerequite config (for positioning) does not exist, it will not add the option/value pair. 
-  - It will not reposition an existing option/value pair. It will warn. Hopefully in the future we can reposition (thats what Chiros do!)
-
-Usage and Example:
+ 
+ Usage and Example:
 
 [user@server ~]$ git clone https://github.com/johnculkin/LinuxChiro
 Cloning into 'LinuxChiro'...
@@ -179,5 +150,33 @@ sudo service rhnsd start > /dev/null
 Commands to undo changes are available in /tmp/tmp.eDQKK23874.tar.gz
 
 [user@server LinuxChiro]$
-
  
+
+Other features:
+- Runs agentless remotely via ssh (it won't take arguments when run remotely but you can hard code options) 
+- Runs as non root and performs rudimentary checks for the required sudo privs (better checks coming in future version).
+  - It will run as root locally (with a warning). 
+- Checks for the availability of required commands before beginning. 
+- Changes are made immediately active when possible and added to the appropriate files for the next service (ex sshd) restart 
+- Results are compressed and saved on the host so that you can compare with past exams.
+- Configurable and (hopefully) descriptive exit codes
+- Provides reason for making each change
+- It will add option/value pairs to the correct location in a config file, Ex below an existing line.
+- It will give an indication if reruning the script might be beneficial  
+- All contained in one bash script
+
+Major Feature additions in the works:
+- Ability to optionally source checks from external config files. Probably YAML format
+- RPM Package checks
+
+Notes and current limitations (some are by design):
+- It will not create files that don't exist but should (ex: /etc/cron.deny). It will warn.
+- It will not delete/remove options, files, services or packages that should not exist. 
+  - Ex Rhost Auth option from pam files, Cron log file "/etc/cron.daily/0logwatch", telnet-server package and rsh service
+  - This isn't a big deal for options in files because we can usually just set things to an appropriate value (ex null or 0) but some things need to be removed. 
+  - It will warn for packages and services that should not exist, currently there is not a way to indicate files and options that should not exist
+- It can't deal correctly with multiple occurrences of an option/value pair in a file (ex: two name servers in /etc/resolve.conf). It evaluates based on the value of the 2nd occurrence, which may cause issues since it could change both instances.  
+- It can't deal with min/max values. It only takes exact - ex if PASS_MAX_DAYS is set to 60 in /etc/login.defs, it will warn if checking for 50 
+- It will not install a service or rpm that should be present but isn't. It will warn. 
+- If the prerequite config (for positioning) does not exist, it will not add the option/value pair immeditately (it may add it on a rerun)
+- It will not reposition an existing option/value pair. It will warn. Hopefully in the future we can reposition in the near future (thats what Chiros do!)
