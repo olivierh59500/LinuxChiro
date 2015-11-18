@@ -458,14 +458,16 @@ for i in "${Conf_LOOP[@]}"; do
 
 		#Check to see if the option/value pair follow a specified line(if applicable) 
 		LineToAddAfter=""
-		if [[ "$textoflinetoaddafter" != "none" ]]; then
-			if sudo grep "$textoflinetoaddafter" "$filename"; then	
+		echo "Option = $option and textoflinetoaddafter=$textoflinetoaddafter"
+		if [[ "$textoflinetoaddafter" != "none" ]]; then #Check to if there is a required line to add the value after 
+			if sudo grep "$textoflinetoaddafter" "$filename"; then #Check if the required line exists 
 				LineToAddAfter=$(sudo grep -n "$textoflinetoaddafter" "$filename" | tail -n1 | grep -o '^[0-9]*')
 				LineToAddAfter=$((LineToAddAfter+1))
-			fi	
-		fi #textoflinetoaddafter check fi
+				echo "LineToAddAfter=$LineToAddAfter"
+			fi	#Check if the required line exists
+		fi #Check to if there is a required line to add the value after 
 		
-		if [[ "$currentsetting" != "$value" ]]; then
+		if [[ "$currentsetting" != "$value" ]]; then #Check if current setting equals the desired value 
 			if [[ -z "$currentsetting" ]]; then
 				echo_text_function "$IncorrectText $option in $filename is not set, it should be $value" "OFF"
 			else #currentsetting else 
@@ -524,22 +526,22 @@ for i in "${Conf_LOOP[@]}"; do
 					fi #Check if the current setting is blank
 				fi #Check to see if we should make this specific change
 			fi #MAKECHANGES check
-		else #currentsetting else
-			if [[ "$textoflinetoaddafter" = "none" ]]; then	
+		else #Check if current setting equals the desired value 
+			if [[ "$textoflinetoaddafter" = "none" ]]; then	#Check if there is a required line to add after 
 				#There is no required line to check for
 				echo_text_function "$CorrectText $option has correct value of $value in $filename" "ON"
-			else #"$textoflinetoaddafter" = "none" 	
-				if [[ "$LineToAddAfter" -eq "" ]]; then #There is a required line to follow that we need to check for
+			else #Check if there is a required line to add after 
+				if [[ "$LineToAddAfter" -eq "" ]]; then #Check if the required line to add after exists 
 					#The required line that this option should follow does not exist
-			        	echo_text_function "$WarningText $option has correct value of $value in $filename but the required previous line of $textoflinetoaddafter is not present" "WARNING"	
-				else #"$LineToAddAfter" -eq "" 
-					if [[ "$LineToAddAfter" -eq "$linenumofcurrentsetting" ]]; then #There is a required line that should precede this option - We need to see if the option is in the correct place
-				        	echo_text_function "$CorrectText $option has correct value of $value in $filename and follows the corret line of $textoflinetoaddafter" "ON"
-					else #line is in correct place
-				        	echo_text_function "$WarningText $option has correct value of $value in $filename but does not follow the correct line of $textoflinetoaddafter" "WARNING"
-					fi #line is in correct place
-				fi #"$LineToAddAfter" -eq "" 
-			fi #"$textoflinetoaddafter" = "none"
+			        echo_text_function "$WarningText $option has correct value of $value in $filename but the required previous line of $textoflinetoaddafter is not present" "WARNING"	
+				else #Check if the required line to add after exists 
+					if [[ "$LineToAddAfter" -eq "$linenumofcurrentsetting" ]]; then #Check if existing line correctly follows the required line
+				        echo_text_function "$CorrectText $option has correct value of $value in $filename and follows the corret line of $textoflinetoaddafter" "ON"
+					else #Check if existing line correctly follows the required line
+				        echo_text_function "$WarningText $option has correct value of $value in $filename but does not follow the correct line of $textoflinetoaddafter" "WARNING"
+					fi #Check if existing line correctly follows the required line
+				fi #Check if the required line to add after exists 
+			fi #Check if there is a required line to add after 
 		fi #currentsetting check
 	else #File Existance check 
 		echo_text_function "$WarningText $filename does not exist" "WARNING"
