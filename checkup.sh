@@ -494,7 +494,7 @@ for i in "${Conf_LOOP[@]}"; do
 					fi ##Are Backsups turned off 
 					
 					if [[ "$currentsetting" != "" ]]; then #Check if the current setting is blank
-						#Correct the existing value for the option
+						#Correct the existing value for the option - We currently don't attempt to move an existing value if it doesn't follow a required line. We will warn for this case though. 
 						execute_command_function "sudo sed -i$BACKUPEXTENTION '/^$option/s/$separator$currentsetting/$separator$value/gi' $filename" "sudo sed -i '/^$option/s/$separator$value/$separator$currentsetting/gi' $filename" "sudo mv $filename$BACKUPEXTENTION \$BACKUPFOLDER"
 						echo_text_function "$ModificationText Changing existing entry - $option$separator$value in $filename" "CHANGED"
 					else #Check if the current setting is blank
@@ -510,7 +510,11 @@ for i in "${Conf_LOOP[@]}"; do
 					fi #Check if the current setting is blank
 					
 					if [[ "$command_to_set_active_value" != "none" ]]; then #Check for a command to set active value
-						execute_command_function "sudo $command_to_set_active_value $flag_to_set_active_value $option$separator$value > /dev/null" "sudo $command_to_set_active_value $flag_to_set_active_value $option$separator$currentsetting > /dev/null" ""
+						if [[ "$currentsetting" != "" ]]; then #Check if the current setting is blank
+							execute_command_function "sudo $command_to_set_active_value $flag_to_set_active_value $option$separator$value > /dev/null" "sudo $command_to_set_active_value $flag_to_set_active_value $option$separator$currentsetting > /dev/null" ""
+						else #Check if the current setting is blank
+							execute_command_function "sudo $command_to_set_active_value $flag_to_set_active_value $option$separator$value > /dev/null" "" ""	
+						fi #Check if the current setting is blank 
 						echo_text_function "$ModificationText Making the new $option value active by running $command_to_set_active_value $flag_to_set_active_value $option$separator$value" "CHANGED"
 					fi #Check for a command to set active value
 					
