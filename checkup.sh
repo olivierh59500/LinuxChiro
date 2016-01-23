@@ -259,76 +259,72 @@ interactive_check_function () { #Function to determine if we should prompt for e
 	fi #INTERACTIVE CHANGES Check
 } #End of interactive_check_function
 
-FILEPERMCHANGECOMMAND="chmod"
-FILEOWNSHIPCHANGECOMMAND="chown"
-
-#Correct File and folder permissions and ownership
-#format - operation,filename,correct value,reason
+#Set Ownership and Permissions on files/folders
 file_and_perm_array=(
-"$FILEPERMCHANGECOMMAND,/etc/inittab,600,disable_gui_login"
-"$FILEPERMCHANGECOMMAND,/etc/security/console.perms,600,disable_user_mounted_removable_file_systems"
-"$FILEPERMCHANGECOMMAND,/var/log/dmesg,640,prevent_access_to_dmesg"
-"$FILEPERMCHANGECOMMAND,/etc/sysctl.conf,600,secure_sysctl"
-"$FILEPERMCHANGECOMMAND,/root,700,root_home_dir"
-"$FILEPERMCHANGECOMMAND,/root/.tcshrc,400,sec_for_root"
-"$FILEPERMCHANGECOMMAND,/root/.bashrc,400,sec_for_root"
-"$FILEPERMCHANGECOMMAND,/root/.cshrc,400,sec_for_root"
-"$FILEPERMCHANGECOMMAND,/etc/csh.cshrc,444,sec_for_root"
-"$FILEPERMCHANGECOMMAND,/etc/bashrc,444,sec_for_root"
-"$FILEPERMCHANGECOMMAND,/var/log/wtmp,600,sec_logs"
-"$FILEPERMCHANGECOMMAND,/var/log/lastlog,600,sec_logs"
-"$FILEPERMCHANGECOMMAND,/var/log/rpmpkgs,640,sec_logs"
-"$FILEPERMCHANGECOMMAND,/etc/securetty,400,sec_console_login"
-"$FILEPERMCHANGECOMMAND,/var/lib/nfs,750,secure_nfs_folder"
-"$FILEPERMCHANGECOMMAND,/etc/cups/cupsd.conf,600,sec_cups"
-"$FILEPERMCHANGECOMMAND,/etc/crontab,400,secure_crontab"
-"$FILEPERMCHANGECOMMAND,/etc/cron.allow,400,secure_crontab"
-"$FILEPERMCHANGECOMMAND,/etc/at.allow,400,secure_crontab"
-"$FILEPERMCHANGECOMMAND,/etc/mail/sendmail.cf,444,secure_sendmail_conf"
-"$FILEPERMCHANGECOMMAND,/var/log/sa,600,secure_sar_files"
-"$FILEPERMCHANGECOMMAND,/var/spool/cron,600,secure_cron"
-"$FILEPERMCHANGECOMMAND,/etc/syslog.conf,640,secure_syslog_conf"
-"$FILEPERMCHANGECOMMAND,/etc/security/access.conf,640,secure_access_conf"
-"$FILEPERMCHANGECOMMAND,/var/spool/cron/root,600,secure_root_crontab"
-"$FILEPERMCHANGECOMMAND,/etc/gshadow,0,secure_gshadow"
-"$FILEPERMCHANGECOMMAND,/etc/shadow,0,secure_shadow"
-"$FILEPERMCHANGECOMMAND,/etc/passwd,644,secure_etc_passwd"
-"$FILEPERMCHANGECOMMAND,/etc/group,644,secure_etc_group"
-"$FILEPERMCHANGECOMMAND,/boot/grub/grub.conf,600,secure_grub_conf"
-"$FILEPERMCHANGECOMMAND,/lib,755,secure_lib"
-"$FILEPERMCHANGECOMMAND,/lib64,755,secure_lib64"
-"$FILEPERMCHANGECOMMAND,/usr/lib,755,secure__usr_lib"
-"$FILEPERMCHANGECOMMAND,/usr/lib64,755,secure__usr_lib64"
-"$FILEPERMCHANGECOMMAND,/var/log/audit,750,secure_audit_dir"
-"$FILEPERMCHANGECOMMAND,/var/log/audit/audit.log,600,secure_audit_fule"
-"$FILEOWNSHIPCHANGECOMMAND,/var/spool/cron/root,root:root,secure_root_crontab"
-"$FILEOWNSHIPCHANGECOMMAND,/var/log/btmp,root:root,secure_logs"
-"$FILEOWNSHIPCHANGECOMMAND,/etc/cups/cupsd.conf,lp:sys,secure_cups_conf"
-"$FILEOWNSHIPCHANGECOMMAND,/etc/pam.d/atd,root:root,secure_pam_conf"
-"$FILEOWNSHIPCHANGECOMMAND,/etc/mail/sendmail.cf,root:bin,secure_sendmail_conf"
-"$FILEOWNSHIPCHANGECOMMAND,/var/log/wtmp,root:root,secure_wtmp"
-"$FILEOWNSHIPCHANGECOMMAND,/etc/gshadow,root:root,secure_gshadow"
-"$FILEOWNSHIPCHANGECOMMAND,/etc/shadow,root:root,secure_shadow"
-"$FILEOWNSHIPCHANGECOMMAND,/etc/passwd,root:root,secure_passwd"
-"$FILEOWNSHIPCHANGECOMMAND,/var/log/audit/audit.log,root:root,secure_audit_file"
-"$FILEOWNSHIPCHANGECOMMAND,/etc/group,root:root,secure_group_file"
-"$FILEOWNSHIPCHANGECOMMAND,/lib,root:root,secure_lib"
-"$FILEOWNSHIPCHANGECOMMAND,/lib64,root:root,secure_lib64"
-"$FILEOWNSHIPCHANGECOMMAND,/usr/lib,root:root,secure_usr_lib"
-"$FILEOWNSHIPCHANGECOMMAND,/usr/lib64,root:root,secure_usr_lib64"
-"$FILEOWNSHIPCHANGECOMMAND,/boot/grub/grub.conf,root:root,secure_grub_conf"
+'{ "Operation": "chmod", "Filename": "/etc/inittab",                "Correct_Value": "600",       "Reason": "disable_gui_login" }'
+'{ "Operation": "chmod", "Filename": "/etc/security/console.perms", "Correct_Value": "600",       "Reason": "disable_user_mounted_removable_file_systems" }'
+'{ "Operation": "chmod", "Filename": "/var/log/dmesg",              "Correct_Value": "640",       "Reason": "prevent_access_to_dmesg" }'
+'{ "Operation": "chmod", "Filename": "/etc/sysctl.conf",            "Correct_Value": "600",       "Reason": "secure_sysctl_conf" }'
+'{ "Operation": "chmod", "Filename": "/root",                       "Correct_Value": "700",       "Reason": "secure_root_home_dir" }'
+'{ "Operation": "chmod", "Filename": "/root/.tcshrc",               "Correct_Value": "400",       "Reason": "sec_for_root" }'
+'{ "Operation": "chmod", "Filename": "/root/.bashrc",               "Correct_Value": "400",       "Reason": "secure_bashrc" }'
+'{ "Operation": "chmod", "Filename": "/root/.cshrc",                "Correct_Value": "400",       "Reason": "secure_cshrc" }'
+'{ "Operation": "chmod", "Filename": "/etc/csh.cshrc",              "Correct_Value": "444",       "Reason": "secure_csh.cshrc" }'
+'{ "Operation": "chmod", "Filename": "/etc/bashrc",                 "Correct_Value": "444",       "Reason": "secure_bashrc" }'
+'{ "Operation": "chmod", "Filename": "/var/log/wtmp",               "Correct_Value": "600",       "Reason": ",sec_logs" }'
+'{ "Operation": "chmod", "Filename": "/var/log/lastlog",            "Correct_Value": "600",       "Reason": "sec_logs" }'
+'{ "Operation": "chmod", "Filename": "/var/log/rpmpkgs",            "Correct_Value": "640",       "Reason": "sec_logs" }'
+'{ "Operation": "chmod", "Filename": "/etc/securetty",              "Correct_Value": "400",       "Reason": "sec_console_login" }'
+'{ "Operation": "chmod", "Filename": "/var/lib/nfs",                "Correct_Value": "750",       "Reason": "secure_nfs_folder" }'
+'{ "Operation": "chmod", "Filename": "/etc/cups/cupsd.conf",        "Correct_Value": "600",       "Reason": "sec_cups" }'
+'{ "Operation": "chmod", "Filename": "/etc/crontab",                "Correct_Value": "400",       "Reason": "secure_crontab" }'
+'{ "Operation": "chmod", "Filename": "/etc/cron.allow",             "Correct_Value": "400",       "Reason": "secure_crontab" }'
+'{ "Operation": "chmod", "Filename": "/etc/at.allow",               "Correct_Value": "400",       "Reason": "secure_at" }'
+'{ "Operation": "chmod", "Filename": "/etc/mail/sendmail.cf",       "Correct_Value": "444",       "Reason": "secure_sendmail_conf" }'
+'{ "Operation": "chmod", "Filename": "/var/log/sa",                 "Correct_Value": "600",       "Reason": "secure_sar_files" }'
+'{ "Operation": "chmod", "Filename": "/var/spool/cron",             "Correct_Value": "600",       "Reason": "secure_cron" }'
+'{ "Operation": "chmod", "Filename": "/etc/syslog.conf",            "Correct_Value": "640",       "Reason": "secure_syslog_conf" }'
+'{ "Operation": "chmod", "Filename": "/etc/security/access.conf",   "Correct_Value": "640",       "Reason": "secure_access_conf" }'
+'{ "Operation": "chmod", "Filename": "/var/spool/cron/root",        "Correct_Value": "600",       "Reason": "secure_root_crontab" }'
+'{ "Operation": "chmod", "Filename": "/etc/gshadow",                "Correct_Value": "0",         "Reason": "secure_gshadow" }'
+'{ "Operation": "chmod", "Filename": "/etc/shadow",                 "Correct_Value": "0",         "Reason": "secure_shadow" }'
+'{ "Operation": "chmod", "Filename": "/etc/passwd",                 "Correct_Value": "644",       "Reason": "secure_etc_passwd" }'
+'{ "Operation": "chmod", "Filename": "/etc/group",                  "Correct_Value": "644",       "Reason": "secure_etc_group" }'
+'{ "Operation": "chmod", "Filename": "/boot/grub/grub.conf",        "Correct_Value": "600",       "Reason": "secure_grub_conf" }'
+'{ "Operation": "chmod", "Filename": "/lib",                        "Correct_Value": "755",       "Reason": "secure_lib" }'
+'{ "Operation": "chmod", "Filename": "/lib64",                      "Correct_Value": "755",       "Reason": "secure_lib64" }'
+'{ "Operation": "chmod", "Filename": "/usr/lib",                    "Correct_Value": "755",       "Reason": "secure__usr_lib" }'
+'{ "Operation": "chmod", "Filename": "/usr/lib64",                  "Correct_Value": "755",       "Reason": "secure__usr_lib64" }'
+'{ "Operation": "chmod", "Filename": "/var/log/audit",              "Correct_Value": "750",       "Reason": "secure_audit_dir" }'
+'{ "Operation": "chmod", "Filename": "/var/log/audit/audit.log",    "Correct_Value": "600",       "Reason": "secure_audit_log" }'
+'{ "Operation": "chown", "Filename": "var/spool/cron/root",         "Correct_Value": "root:root", "Reason": "secure_root_crontab" }'
+'{ "Operation": "chown", "Filename": "/var/log/btmp",               "Correct_Value": "root:root", "Reason": "secure_logs" }'
+'{ "Operation": "chown", "Filename": "/etc/cups/cupsd.conf",        "Correct_Value": "lp:sys", "   Reason": "secure_cups_conf" }'
+'{ "Operation": "chown", "Filename": "/etc/pam.d/atd",              "Correct_Value": "root:root", "Reason": "secure_pam_conf" }'
+'{ "Operation": "chown", "Filename": "/etc/mail/sendmail.cf",       "Correct_Value": "root:bin",  "Reason": "secure_sendmail_conf" }'
+'{ "Operation": "chown", "Filename": "/var/log/wtmp",               "Correct_Value": "root:root", "Reason": "secure_wtmp" }'
+'{ "Operation": "chown", "Filename": "/etc/gshadow",                "Correct_Value": "root:root", "Reason": "secure_gshadow" }'
+'{ "Operation": "chown", "Filename": "/etc/shadow",                 "Correct_Value": "root:root", "Reason": "secure_shadow" }'
+'{ "Operation": "chown", "Filename": "/etc/passwd",                 "Correct_Value": "root:root", "Reason": "secure_passwd" }'
+'{ "Operation": "chown", "Filename": "/var/log/audit/audit.log",    "Correct_Value": "root:root", "Reason": "secure_audit_log" }'
+'{ "Operation": "chown", "Filename": "/etc/group",                  "Correct_Value": "root:root", "Reason": "secure_group_file" }'
+'{ "Operation": "chown", "Filename": "/lib",                        "Correct_Value": "root:root", "Reason": "secure_lib" }'
+'{ "Operation": "chown", "Filename": "/lib64",                      "Correct_Value": "root:root", "Reason": "secure_lib64" }'
+'{ "Operation": "chown", "Filename": "/usr/lib",                    "Correct_Value": "root:root", "Reason": "secure_usr_lib" }'
+'{ "Operation": "chown", "Filename": "/usr/lib64",                  "Correct_Value": "root:root", "Reason": "secure_usr_lib64" }'
+'{ "Operation": "chown", "Filename": "/boot/grub/grub.conf",        "Correct_Value": "root:root", "Reason": "secure_grub_conf" }'
 )
 
 for i in "${file_and_perm_array[@]}"; do
-	operation=$(echo "$i" | awk -F, '{print $1;}')
-	file=$(echo "$i" | awk -F, '{print $2;}')
-	correctsetting=$(echo "$i" | awk -F, '{print $3;}')
-	reason=$(echo "$i" | awk -F, '{print $4;}')
-	
+        operation=$(echo "$i" | grep -Po '(?<="Operation": ")[^"]*')
+        file=$(echo "$i" | grep -Po '(?<="Filename": ")[^"]*')
+        correctsetting=$(echo "$i" | grep -Po '(?<="Correct_Value": ")[^"]*')
+        reason=$(echo "$i" | grep -Po '(?<="Reason": ")[^"]*')
+
 	if sudo stat "$file" > /dev/null 2>&1; then #Check the file or directory exists
-		if [[ "$operation" = "$FILEPERMCHANGECOMMAND" ]]; then #operation check
+		if [[ "$operation" = "chmod" ]]; then #operation check
 			filevaluecheck=$(sudo stat -c %a "$file")
-		elif [[ "$operation" = "$FILEOWNSHIPCHANGECOMMAND" ]]; then #operation check
+		elif [[ "$operation" = "chown" ]]; then #operation check
 			filevaluecheck=$(sudo stat -c %U:%G "$file")
 		else #operation check catch all 
 		        echo_text_function "Error processing filevaluecheck it was set to $filevaluecheck"; exit $FilevaluecheckError
@@ -369,77 +365,78 @@ php_conf="/etc/php.ini"
 rpmpkgslog_conf="/etc/logrotate.d/rpm"
 network_conf="/etc/sysconfig/network"
 
-#Configure some things
-#format:
-#filename,option,value,SeparatorOfOptionAndValueInConf,command_to_set_active_value,flag_for_command_to_set_active_value,service_to_reload,line_to_add_after,reason_for_change
+#Configure Options and Values in files
 Conf_LOOP=(
-"$sysctlfile,net.ipv4.tcp_max_syn_backlog,4096,=,sysctl,-w,none,none,sysctl_tuning"
-"$sysctlfile,net.ipv4.conf.all.rp_filter,1,=,sysctl,-w,none,none,sysctl_tuning"
-"$sysctlfile,net.ipv4.conf.all.accept_source_route,0,=,sysctl,-w,none,none,sysctl_tuning"
-"$sysctlfile,net.ipv4.conf.all.accept_redirects,0,=,sysctl,-w,none,none,sysctl_tuning"
-"$sysctlfile,net.ipv4.conf.all.secure_redirects,0,=,sysctl,-w,none,none,sysctl_tuning"
-"$sysctlfile,net.ipv4.conf.default.accept_redirects,0,=,sysctl,-w,none,none,sysctl_tuning"
-"$sysctlfile,net.ipv4.conf.default.secure_redirects,0,=,sysctl,-w,none,none,sysctl_tuning"
-"$sysctlfile,net.ipv4.conf.all.send_redirects,0,=,sysctl,-w,none,none,sysctl_tuning"
-"$sysctlfile,net.ipv4.conf.default.send_redirects,0,=,sysctl,-w,none,none,sysctl_tuning"
-"$sysctlfile,net.ipv4.tcp_syncookies,1,=,sysctl,-w,none,none,sysctl_tuning"
-"$sysctlfile,net.ipv4.icmp_echo_ignore_broadcasts,1,=,sysctl,-w,none,none,sysctl_tuning"
-"$sysctlfile,net.ipv4.icmp_ignore_bogus_error_responses,1,=,sysctl,-w,none,none,sysctl_tuning"
-"$sysctlfile,net.ipv4.ip_forward,0,=,sysctl,-w,none,none,sysctl_tuning"
-"$sysctlfile,net.ipv4.conf.all.log_martians,1,=,sysctl,-w,none,none,sysctl_tuning"
-"$sysctlfile,net.ipv4.conf.default.rp_filter,1,=,sysctl,-w,none,none,sysctl_tuning"
-"$sysctlfile,vm.swappiness,0,=,sysctl,-w,none,none,sysctl_tuning"
-"$sysctlfile,kernel.randomize_va_space,2,=,sysctl,-w,none,none,sysctl_tuning"
-"$sysctlfile,kernel.exec-shield,1,=,sysctl,-w,none,none,sysctl_tuning"
-"$ssh_client_config,HashKnownHosts,yes, ,none,none,none,none,ssh_client_tuning"
-"$ssh_client_config,RhostsAuthentication,no, ,none,none,none,none,ssh_client_tuning"
-"$ssh_client_config,HostbasedAuthentication,no, ,none,none,none,none,ssh_client_tuning"
-"$ssh_client_config,Protocol,2, ,none,none,none,none,ssh_client_tuning"
-"$sshd_config,PrintLastLog,yes, ,none,none,$sshd_service,none,sshd_tuning"
-"$sshd_config,Protocol,2, ,none,none,$sshd_service,none,sshd_tuning"
-"$sshd_config,PermitRootLogin,no, ,none,none,$sshd_service,none,sshd_tuning"
-"$sshd_config,LoginGraceTime,30, ,none,none,$sshd_service,none,sshd_tuning"
-"$sshd_config,MaxAuthTries,2, ,none,none,$sshd_service,none,sshd_tuning"
-"$sshd_config,PermitEmptyPasswords,no, ,none,none,$sshd_service,none,sshd_tuning"
-"$sshd_config,HostbasedAuthentication,no, ,none,none,$sshd_service,none,sshd_tuning"
-"$sshd_config,IgnoreRhosts,yes, ,none,none,$sshd_service,none,sshd_tuning"
-"$sshd_config,MaxStartups,3, ,none,none,$sshd_service,^Subsystem,sshd_tuning"
-"$sshd_config,AllowTcpForwarding,no, ,none,none,$sshd_service,^MaxAuthTries,sshd_tuning"
-"$sshd_config,ClientAliveInterval,3600, ,none,none,$sshd_service,none,sshd_tuning"
-"$sshd_config,ClientAliveCountMax,0, ,none,none,$sshd_service,none,sshd_tuning"
-"$sshd_config,PermitUserEnvironment,no, ,none,none,$sshd_service,none,sshd_tuning"
-"$sshd_config,Banner,/etc/issue, ,none,none,$sshd_service,^PermitUserEnvironment,sshd_tuning"
-"$etc_resolv_conf,search,scranton.edu, ,none,none,none,none,set_default_dns_search"
-"$logins_defs,PASS_MIN_LEN,14,\t,none,none,none,none,logins_defs_securing"
-"$logins_defs,PASS_MIN_DAYS,1,\t,none,none,none,none,logins_defs_securing"
-"$logins_defs,PASS_MAX_DAYS,60,\t,none,none,none,none,logins_defs_securing"
-"$logins_defs,PASS_WARN_AGE,7,\t,none,none,none,none,logins_defs_securing"
-"$logins_defs,ENCRYPT_METHOD,SHA512, ,none,none,none,none,logins_defs_securing"
-"$sysconfig_init,PROMPT,no,=,none,none,none,none,sysconfig_securing"
-"$httpd_conf,ServerSignature,Off, ,none,none,httpd,none,httpd_securing"
-"$httpd_conf,ServerTokens,Prod, ,none,none,httpd,none,httpd_securing"
-"$httpd_conf,TraceEnable,Off, ,none,none,httpd,none,httpd_securing"
-"$httpd_conf,Header always append,SAMEORIGIN, X-Frame-Options ,none,none,httpd,none,click_jacking_protection"
-"$ssl_conf,Header always add,\"max-age=15768000\", Strict-Transport-Security ,none,none,httpd,^SSLHonorCipherOrder,HSTS_enforcement"
-"$ssl_conf,SSLProtocol,all -SSLv2 -SSLv3, ,none,none,httpd,none,ssl_secure_protocols"
-"$ssl_conf,SSLCipherSuite,HIGH:!aNULL:!MD5:!EXP, ,none,none,httpd,^SSLProtocol,ssl_secure_ciphers"
-"$ssl_conf,SSLHonorCipherOrder,on, ,none,none,httpd,^SSLCipherSuite,ssl_obey_server_ciphers"
-"$php_conf,expose_php,off, = ,none,none,none,none,php_securing"
-"$rpmpkgslog_conf,create 0640,root root,\t,none,none,syslog,weekly,correcting_default_file_perms"
-"$network_conf,NOZEROCONF,yes,=,none,none,network,none,disabling_zeroconf"
+'{ "Filename": "/etc/sysctl.conf",     "Option": "net.ipv4.tcp_max_syn_backlog",                "Value": "4096",   "Separator": "=",   "Command_To_Set_Active_Value":   "sysctl",  "Flag_To_Set_Active_Value": "-w",  "Service_To_Reload": "none",  "Line_To_Add_After": "none",  "Reason": "sysctl_tuning" }'
+'{ "Filename": "/etc/sysctl.conf",     "Option": "net.ipv4.conf.all.rp_filter",                 "Value": "1",      "Separator": "=",   "Command_To_Set_Active_Value":   "sysctl",  "Flag_To_Set_Active_Value": "-w",   "Service_To_Reload": "none",  "Line_To_Add_After": "none",  "Reason": "sysctl_tuning" }'
+'{ "Filename": "/etc/sysctl.conf",     "Option": "net.ipv4.conf.all.accept_source_route",       "Value": "0",      "Separator": "=",   "Command_To_Set_Active_Value":   "sysctl",  "Flag_To_Set_Active_Value": "-w",   "Service_To_Reload": "none",  "Line_To_Add_After": "none",  "Reason": "sysctl_tuning" }'
+'{ "Filename": "/etc/sysctl.conf",     "Option": "net.ipv4.conf.all.accept_redirects",          "Value": "0",      "Separator": "=",   "Command_To_Set_Active_Value":   "sysctl",  "Flag_To_Set_Active_Value": "-w",   "Service_To_Reload": "none",  "Line_To_Add_After": "none",  "Reason": "sysctl_tuning" }'
+'{ "Filename": "/etc/sysctl.conf",     "Option": "net.ipv4.conf.all.secure_redirects",          "Value": "0",      "Separator": "=",   "Command_To_Set_Active_Value":   "sysctl",  "Flag_To_Set_Active_Value": "-w",   "Service_To_Reload": "none",  "Line_To_Add_After": "none",  "Reason": "sysctl_tuning" }'
+'{ "Filename": "/etc/sysctl.conf",     "Option": "net.ipv4.conf.default.accept_redirects",      "Value": "0",      "Separator": "=",   "Command_To_Set_Active_Value":   "sysctl",  "Flag_To_Set_Active_Value": "-w",   "Service_To_Reload": "none",  "Line_To_Add_After": "none",  "Reason": "sysctl_tuning" }'
+'{ "Filename": "/etc/sysctl.conf",     "Option": "net.ipv4.conf.default.secure_redirects",      "Value": "0",      "Separator": "=",   "Command_To_Set_Active_Value":   "sysctl",  "Flag_To_Set_Active_Value": "-w",   "Service_To_Reload": "none",  "Line_To_Add_After": "none",  "Reason": "sysctl_tuning" }'
+'{ "Filename": "/etc/sysctl.conf",     "Option": "net.ipv4.conf.all.send_redirects",            "Value": "0",      "Separator": "=",   "Command_To_Set_Active_Value":   "sysctl",  "Flag_To_Set_Active_Value": "-w",   "Service_To_Reload": "none",  "Line_To_Add_After": "none",  "Reason": "sysctl_tuning" }'
+'{ "Filename": "/etc/sysctl.conf",     "Option": "net.ipv4.conf.default.send_redirects",        "Value": "0",      "Separator": "=",   "Command_To_Set_Active_Value":   "sysctl",  "Flag_To_Set_Active_Value": "-w",   "Service_To_Reload": "none",  "Line_To_Add_After": "none",  "Reason": "sysctl_tuning" }'
+'{ "Filename": "/etc/sysctl.conf",     "Option": "net.ipv4.tcp_syncookies",                     "Value": "1",      "Separator": "=",   "Command_To_Set_Active_Value":   "sysctl",  "Flag_To_Set_Active_Value": "-w",   "Service_To_Reload": "none",  "Line_To_Add_After": "none",  "Reason": "sysctl_tuning" }'
+'{ "Filename": "/etc/sysctl.conf",     "Option": "net.ipv4.icmp_echo_ignore_broadcasts",        "Value": "1",      "Separator": "=",   "Command_To_Set_Active_Value":   "sysctl",  "Flag_To_Set_Active_Value": "-w",   "Service_To_Reload": "none",  "Line_To_Add_After": "none",  "Reason": "sysctl_tuning" }'
+'{ "Filename": "/etc/sysctl.conf",     "Option": "net.ipv4.icmp_ignore_bogus_error_responses",  "Value": "1",      "Separator": "=",   "Command_To_Set_Active_Value":   "sysctl",  "Flag_To_Set_Active_Value": "-w",   "Service_To_Reload": "none",  "Line_To_Add_After": "none",  "Reason": "sysctl_tuning" }'
+'{ "Filename": "/etc/sysctl.conf",     "Option": "net.ipv4.ip_forward",                         "Value": "0",      "Separator": "=",   "Command_To_Set_Active_Value":   "sysctl",  "Flag_To_Set_Active_Value": "-w",   "Service_To_Reload": "none",  "Line_To_Add_After": "none",  "Reason": "sysctl_tuning" }'
+'{ "Filename": "/etc/sysctl.conf",     "Option": "net.ipv4.conf.all.log_martians",              "Value": "1",      "Separator": "=",   "Command_To_Set_Active_Value":   "sysctl",  "Flag_To_Set_Active_Value": "-w",   "Service_To_Reload": "none",  "Line_To_Add_After": "none",  "Reason": "sysctl_tuning" }'
+'{ "Filename": "/etc/sysctl.conf",     "Option": "net.ipv4.conf.default.rp_filter",             "Value": "1",      "Separator": "=",   "Command_To_Set_Active_Value":   "sysctl",  "Flag_To_Set_Active_Value": "-w",   "Service_To_Reload": "none",  "Line_To_Add_After": "none",  "Reason": "sysctl_tuning" }'
+'{ "Filename": "/etc/sysctl.conf",     "Option": "vm.swappiness",                               "Value": "1",      "Separator": "=",   "Command_To_Set_Active_Value":   "sysctl",  "Flag_To_Set_Active_Value": "-w",   "Service_To_Reload": "none",  "Line_To_Add_After": "none",  "Reason": "sysctl_tuning" }'
+'{ "Filename": "/etc/sysctl.conf",     "Option": "kernel.randomize_va_space",                   "Value": "2",      "Separator": "=",   "Command_To_Set_Active_Value":   "sysctl",  "Flag_To_Set_Active_Value": "-w",   "Service_To_Reload": "none",  "Line_To_Add_After": "none",  "Reason": "sysctl_tuning" }'
+'{ "Filename": "/etc/sysctl.conf",     "Option": "kernel.exec-shield",                          "Value": "1",      "Separator": "=",   "Command_To_Set_Active_Value":   "sysctl",  "Flag_To_Set_Active_Value": "-w",   "Service_To_Reload": "none",  "Line_To_Add_After": "none",  "Reason": "sysctl_tuning" }'
+'{ "Filename": "/etc/ssh/ssh_config",  "Option": "HashKnownHosts",                              "Value": "yes",    "Separator": " ",   "Command_To_Set_Active_Value":   "none",    "Flag_To_Set_Active_Value": "none", "Service_To_Reload": "none",  "Line_To_Add_After": "none",  "Reason": "ssh_client_tuning" }'
+'{ "Filename": "/etc/ssh/ssh_config",  "Option": "RhostsAuthentication",                        "Value": "no",     "Separator": " ",   "Command_To_Set_Active_Value":   "none",    "Flag_To_Set_Active_Value": "none", "Service_To_Reload": "none",  "Line_To_Add_After": "none",  "Reason": "ssh_client_tuning" }'
+'{ "Filename": "/etc/ssh/ssh_config",  "Option": "HostbasedAuthentication",                     "Value": "no",     "Separator": " ",   "Command_To_Set_Active_Value":   "none",    "Flag_To_Set_Active_Value": "none", "Service_To_Reload": "none",  "Line_To_Add_After": "none",  "Reason": "ssh_client_tuning" }'
+'{ "Filename": "/etc/ssh/ssh_config",  "Option": "Protocol",                                    "Value": "2",      "Separator": " ",   "Command_To_Set_Active_Value":   "none",    "Flag_To_Set_Active_Value": "none", "Service_To_Reload": "none",  "Line_To_Add_After": "none",  "Reason": "ssh_client_tuning" }'
+'{ "Filename": "/etc/ssh/sshd_config",  "Option": "Protocol",                                   "Value": "2",      "Separator": " ",   "Command_To_Set_Active_Value":   "none",    "Flag_To_Set_Active_Value": "none", "Service_To_Reload": "sshd",  "Line_To_Add_After": "none",  "Reason": "sshd_tuning" }'
+'{ "Filename": "/etc/ssh/sshd_config",  "Option": "PrintLastLog",                               "Value": "yes"     "Separator": " ",   "Command_To_Set_Active_Value":   "none",    "Flag_To_Set_Active_Value": "none", "Service_To_Reload": "sshd",  "Line_To_Add_After": "none",  "Reason": "sshd_tuning" }'
+'{ "Filename": "/etc/ssh/sshd_config",  "Option": "PermitRootLogin",                            "Value": "no",     "Separator": " ",   "Command_To_Set_Active_Value":   "none",    "Flag_To_Set_Active_Value": "none", "Service_To_Reload": "sshd",  "Line_To_Add_After": "none",  "Reason": "sshd_tuning" }'
+'{ "Filename": "/etc/ssh/sshd_config",  "Option": "LoginGraceTime",                             "Value": "30",     "Separator": " ",   "Command_To_Set_Active_Value":   "none",    "Flag_To_Set_Active_Value": "none", "Service_To_Reload": "sshd",  "Line_To_Add_After": "none",  "Reason": "sshd_tuning" }'
+'{ "Filename": "/etc/ssh/sshd_config",  "Option": "MaxAuthTries",                               "Value": "2",      "Separator": " ",   "Command_To_Set_Active_Value":   "none",    "Flag_To_Set_Active_Value": "none", "Service_To_Reload": "sshd",  "Line_To_Add_After": "none",  "Reason": "sshd_tuning" }'
+'{ "Filename": "/etc/ssh/sshd_config",  "Option": "PermitEmptyPasswords",                       "Value": "no",     "Separator": " ",   "Command_To_Set_Active_Value":   "none",    "Flag_To_Set_Active_Value": "none", "Service_To_Reload": "sshd",  "Line_To_Add_After": "none",  "Reason": "sshd_tuning" }'
+'{ "Filename": "/etc/ssh/sshd_config",  "Option": "HostbasedAuthentication",                    "Value": "no",     "Separator": " ",   "Command_To_Set_Active_Value":   "none",    "Flag_To_Set_Active_Value": "none", "Service_To_Reload": "sshd",  "Line_To_Add_After": "none",  "Reason": "sshd_tuning" }'
+'{ "Filename": "/etc/ssh/sshd_config",  "Option": "IgnoreRhosts",                               "Value": "yes",    "Separator": " ",   "Command_To_Set_Active_Value":   "none",    "Flag_To_Set_Active_Value": "none", "Service_To_Reload": "sshd",  "Line_To_Add_After": "none",  "Reason": "sshd_tuning" }'
+'{ "Filename": "/etc/ssh/sshd_config",  "Option": "MaxStartups",                                "Value": "3",      "Separator": " ",   "Command_To_Set_Active_Value":   "none",    "Flag_To_Set_Active_Value": "none", "Service_To_Reload": "sshd",  "Line_To_Add_After": "none",  "Reason": "sshd_tuning" }'
+'{ "Filename": "/etc/ssh/sshd_config",  "Option": "AllowTcpForwarding",                         "Value": "no",     "Separator": " ",   "Command_To_Set_Active_Value":   "none",    "Flag_To_Set_Active_Value": "none", "Service_To_Reload": "sshd",  "Line_To_Add_After": "none",  "Reason": "sshd_tuning" }'
+'{ "Filename": "/etc/ssh/sshd_config",  "Option": "ClientAliveInterval",                        "Value": "3600",   "Separator": " ",   "Command_To_Set_Active_Value":   "none",    "Flag_To_Set_Active_Value": "none", "Service_To_Reload": "sshd",  "Line_To_Add_After": "none",  "Reason": "sshd_tuning" }'
+'{ "Filename": "/etc/ssh/sshd_config",  "Option": "ClientAliveCountMax",                        "Value": "0",      "Separator": " ",   "Command_To_Set_Active_Value":   "none",    "Flag_To_Set_Active_Value": "none", "Service_To_Reload": "sshd",  "Line_To_Add_After": "none",  "Reason": "sshd_tuning" }'
+'{ "Filename": "/etc/ssh/sshd_config",  "Option": "PermitUserEnvironment",                      "Value": "no",     "Separator": " ",   "Command_To_Set_Active_Value":   "none",    "Flag_To_Set_Active_Value": "none", "Service_To_Reload": "sshd",  "Line_To_Add_After": "none",  "Reason": "sshd_tuning" }'
+'{ "Filename": "/etc/ssh/sshd_config",  "Option": "Banner",                                     "Value": "/etc/issue",      "Separator": " ",   "Command_To_Set_Active_Value":   "none",    "Flag_To_Set_Active_Value": "none", "Service_To_Reload": "sshd",  "Line_To_Add_After": "none",  "Reason": "sshd_tuning" }'
+'{ "Filename": "/etc/ssh/sshd_config",  "Option": "Ciphers",                                    "Value": "aes128-ctr,aes192-ctr,aes256-ctr,arcfour256,arcfour128,arcfour",      "Separator": " ",   "Command_To_Set_Active_Value":   "none",    "Flag_To_Set_Active_Value": "none", "Service_To_Reload": "sshd",  "Line_To_Add_After": "none",  "Reason": "sshd_tuning" }'
+'{ "Filename": "/etc/ssh/sshd_config",  "Option": "MACs",                                       "Value": "hmac-sha1,hmac-ripemd160",      "Separator": " ",   "Command_To_Set_Active_Value":   "none",    "Flag_To_Set_Active_Value": "none", "Service_To_Reload": "sshd",  "Line_To_Add_After": "none",  "Reason": "sshd_tuning" }'
+'{ "Filename": "/etc/sysconfig/selinux",  "Option": "SELINUX",                                  "Value": "disabled",      "Separator": "=",   "Command_To_Set_Active_Value":   "none",    "Flag_To_Set_Active_Value": "none", "Service_To_Reload": "none",  "Line_To_Add_After": "none",  "Reason": "SELINUX" }'
+'{ "Filename": "/etc/login.defs",  "Option": "PASS_MIN_LEN",                                    "Value": "14",      "Separator": "\t",   "Command_To_Set_Active_Value":   "none",    "Flag_To_Set_Active_Value": "none", "Service_To_Reload": "none",  "Line_To_Add_After": "none",  "Reason": "logins_defs_securing" }'
+'{ "Filename": "/etc/login.defs",  "Option": "PASS_MIN_DAYS",                                   "Value": "1",       "Separator": "\t",   "Command_To_Set_Active_Value":   "none",    "Flag_To_Set_Active_Value": "none", "Service_To_Reload": "none",  "Line_To_Add_After": "none",  "Reason": "logins_defs_securing" }'
+'{ "Filename": "/etc/login.defs",  "Option": "PASS_MAX_DAYS",                                   "Value": "60",      "Separator": "\t",   "Command_To_Set_Active_Value":   "none",    "Flag_To_Set_Active_Value": "none", "Service_To_Reload": "none",  "Line_To_Add_After": "none",  "Reason": "logins_defs_securing" }'
+'{ "Filename": "/etc/login.defs",  "Option": "PASS_WARN_AGE",                                   "Value": "7",       "Separator": "\t",   "Command_To_Set_Active_Value":   "none",    "Flag_To_Set_Active_Value": "none", "Service_To_Reload": "none",  "Line_To_Add_After": "none",  "Reason": "logins_defs_securing" }'
+'{ "Filename": "/etc/login.defs",  "Option": "ENCRYPT_METHOD",                                  "Value": "SHA512",  "Separator": "\t",   "Command_To_Set_Active_Value":   "none",    "Flag_To_Set_Active_Value": "none", "Service_To_Reload": "none",  "Line_To_Add_After": "none",  "Reason": "logins_defs_securing" }'
+'{ "Filename": "/etc/httpd/conf/httpd.conf",  "Option": "ServerSignature",                      "Value": "Off",      "Separator": " ",   "Command_To_Set_Active_Value":   "none",    "Flag_To_Set_Active_Value": "none", "Service_To_Reload": "httpd",  "Line_To_Add_After": "none",  "Reason": "httpd_securing" }'
+'{ "Filename": "/etc/httpd/conf/httpd.conf",  "Option": "ServerTokens",                         "Value": "Prod",      "Separator": " ",   "Command_To_Set_Active_Value":   "none",    "Flag_To_Set_Active_Value": "none", "Service_To_Reload": "httpd",  "Line_To_Add_After": "none",  "Reason": "httpd_securing" }'
+'{ "Filename": "/etc/httpd/conf/httpd.conf",  "Option": "TraceEnable",                          "Value": "Off",      "Separator": " ",   "Command_To_Set_Active_Value":   "none",    "Flag_To_Set_Active_Value": "none", "Service_To_Reload": "httpd",  "Line_To_Add_After": "none",  "Reason": "httpd_securing" }'
+'{ "Filename": "/etc/httpd/conf/httpd.conf",  "Option": "Header always append",                 "Value": "SAMEORIGIN",      "Separator": " X-Frame-Options ",   "Command_To_Set_Active_Value":   "none",    "Flag_To_Set_Active_Value": "none", "Service_To_Reload": "httpd",  "Line_To_Add_After": "none",  "Reason": "click_jacking_protection" }'
+'{ "Filename": "/etc/httpd/conf.d/ssl.conf",  "Option": "SSLProtocol",                          "Value": "all -SSLv2 -SSLv3",      "Separator": " ",   "Command_To_Set_Active_Value":   "none",    "Flag_To_Set_Active_Value": "none", "Service_To_Reload": "httpd",  "Line_To_Add_After": "none",  "Reason": "ssl_secure_protocols" }'
+'{ "Filename": "/etc/sysconfig/network",  "Option": "NOZEROCONF",                          "Value": "yes",      "Separator": "=",   "Command_To_Set_Active_Value":   "none",    "Flag_To_Set_Active_Value": "none", "Service_To_Reload": "network",  "Line_To_Add_After": "none",  "Reason": "disabling_zeroconf" }'
+'{ "Filename": "/etc/php.ini",  "Option": "expose_php",                          "Value": "off",      "Separator": " = ",   "Command_To_Set_Active_Value":   "none",    "Flag_To_Set_Active_Value": "none", "Service_To_Reload": "none",  "Line_To_Add_After": "none",  "Reason": "php_securing" }'
+'{ "Filename": "/etc/php.ini",  "Option": "enable_dl",                           "Value": "Off",      "Separator": " = ",   "Command_To_Set_Active_Value":   "none",    "Flag_To_Set_Active_Value": "none", "Service_To_Reload": "none",  "Line_To_Add_After": "none",  "Reason": "php_securing" }'
+'{ "Filename": "/etc/php.ini",  "Option": "allow_url_fopen",                     "Value": "Off",      "Separator": " = ",   "Command_To_Set_Active_Value":   "none",    "Flag_To_Set_Active_Value": "none", "Service_To_Reload": "none",  "Line_To_Add_After": "none",  "Reason": "php_securing" }'
+'{ "Filename": "/etc/php.ini",  "Option": "allow_url_include",                   "Value": "Off",      "Separator": " = ",   "Command_To_Set_Active_Value":   "none",    "Flag_To_Set_Active_Value": "none", "Service_To_Reload": "none",  "Line_To_Add_After": "none",  "Reason": "php_securing" }'
+'{ "Filename": "/etc/sysconfig/init",  "Option": "PROMPT",                   "Value": "no",      "Separator": "=",   "Command_To_Set_Active_Value":   "none",    "Flag_To_Set_Active_Value": "none", "Service_To_Reload": "none",  "Line_To_Add_After": "none",  "Reason": "sysconfig_securing" }'
+'{ "Filename": "/etc/logrotate.d/rpm",  "Option": "create 0640",                   "Value": "root root",      "Separator": "\t",   "Command_To_Set_Active_Value":   "none",    "Flag_To_Set_Active_Value": "none", "Service_To_Reload": "none",  "Line_To_Add_After": "none",  "Reason": "sysconfig_securing" }'
 )
 
 #TODO - check for duplicate entries of the same option (especially with different values)
 for i in "${Conf_LOOP[@]}"; do
-	filename=$(echo "$i" | awk -F, '{print $1;}')
-	option=$(echo "$i" | awk -F, '{print $2;}')
-	value=$(echo "$i" | awk -F, '{print $3;}')
-	separator=$(echo "$i" | awk -F, '{print $4;}')
-	command_to_set_active_value=$(echo "$i" | awk -F, '{print $5;}')
-	flag_to_set_active_value=$(echo "$i" | awk -F, '{print $6;}')
-	servive_to_reload=$(echo "$i" | awk -F, '{print $7;}')
-	textoflinetoaddafter=$(echo "$i" | awk -F, '{print $8;}')
-	reason=$(echo "$i" | awk -F, '{print $9;}')
+
+	filename=$(echo "$i" | grep -Po '(?<="Filename": ")[^"]*')
+	option=$(echo "$i" | grep -Po '(?<="Option": ")[^"]*')
+	value=$(echo "$i" | grep -Po '(?<="Value": ")[^"]*')
+	separator=$(echo "$i" | grep -Po '(?<="Separator": ")[^"]*')
+	command_to_set_active_value=$(echo "$i" | grep -Po '(?<="Command_To_Set_Active_Value": ")[^"]*')
+	flag_to_set_active_value=$(echo "$i" | grep -Po '(?<="Flag_To_Set_Active_Value": ")[^"]*')
+	servive_to_reload=$(echo "$i" | grep -Po '(?<="Service_To_Reload": ")[^"]*')
+	textoflinetoaddafter=$(echo "$i" | grep -Po '(?<="Line_To_Add_After": ")[^"]*')
+	reason=$(echo "$i" | grep -Po '(?<="Reason": ")[^"]*')
 	
 	if sudo stat "$filename" > /dev/null 2>&1; then #File Existance check
 		#We pipe to tail -n1 because there is a current limitation that we can only check one instance of the option, so we check the last. 
@@ -450,23 +447,26 @@ for i in "${Conf_LOOP[@]}"; do
 		#Get the line number of the current setting.
 		linenumofcurrentsetting=$(sudo grep -n "^$option" "$filename" | tail -n1 | grep -o '^[0-9]*')
 
-		#check for additional occurrences
+		#check for additional occurrences and warn
 		if [[ "$(sudo grep -c "^$option" "$filename")" -gt "1" ]]; then
 			echo_text_function "$WarningText There are multiple occurrences of $option in $filename - Only checking the last one" "WARNING"
 		fi #Multiple occurrences check
 
 		#Check to see if the option/value pair follow a specified line(if applicable) 
-		LineToAddAfter=""
+		LineNumberToAddAfter=""
+		REQUIREDLINENOTFOUND=$No
 		#echo "Option = $option and textoflinetoaddafter=$textoflinetoaddafter"
 		if [[ "$textoflinetoaddafter" != "none" ]]; then #Check to if there is a required line to add the value after 
 			if sudo grep -q "$textoflinetoaddafter" "$filename"; then #Check if the required line exists 
-				LineToAddAfter=$(sudo grep -n "$textoflinetoaddafter" "$filename" | tail -n1 | grep -o '^[0-9]*')
+				LineNumberToAddAfter=$(sudo grep -n "$textoflinetoaddafter" "$filename" | tail -n1 | grep -o '^[0-9]*')
 				#When we want to add the funtionality to add a value BEFORE a specified line, we can skip the following increment
-				LineToAddAfter=$((LineToAddAfter+1))
-				echo "============================== LineToAddAfter=$LineToAddAfter"
+				LineNumberToAddAfter=$((LineNumberToAddAfter+1))
+			else #Check to if there is a required line to add the value after
+				#There was a required line and it was not found in the file	
+				REQUIREDLINENOTFOUND=$Yes
 			fi	#Check if the required line exists
 		fi #Check to if there is a required line to add the value after 
-		
+
 		if [[ "$currentsetting" != "$value" ]]; then #Check if current setting equals the desired value 
 			if [[ -z "$currentsetting" ]]; then
 				echo_text_function "$IncorrectText $option in $filename is not set, it should be $value" "OFF"
@@ -476,14 +476,14 @@ for i in "${Conf_LOOP[@]}"; do
 			fi #currentsetting end if 
 
 			if [[ "$MAKECHANGES" -eq "$Yes" ]]; then #Make Changes        
-				if [[ "$LineToAddAfter" -lt "2" ]]; then #Check to see if there was a required placement line and if it existed 
+				if [[ "$REQUIREDLINENOTFOUND" -eq "$Yes" ]]; then #Check to see if there was a required placement line and if it existed 
 					MAKETHISCHANGE=$No
 					echo_text_function "$WarningText We can not add $option to $filename becuase the required line of $textoflinetoaddafter does not exist" "WARNING"
 					#We should set a flag to indicate that the script may need to rerun - the required line might be added with a later check
 					MAYNEEDTOBERERUN=$Yes
 				else #Check to see if there was a required placement line and if it existed
 					interactive_check_function "Would you like to set $option to $value in $filename? [y/N]"
-                fi #Check to see if there was a required placement line and if it existed
+                		fi #Check to see if there was a required placement line and if it existed
 
 				if [[ "$MAKETHISCHANGE" -eq "$Yes" ]]; then #Check to see if we should make this specific change 
 					if [[ "$TURNOFFBACKUPS" -eq "$No" ]]; then #Are Backsups turned off 
@@ -498,14 +498,14 @@ for i in "${Conf_LOOP[@]}"; do
 						execute_command_function "sudo sed -i$BACKUPEXTENTION '/^$option/s/$separator$currentsetting/$separator$value/gi' $filename" "sudo sed -i '/^$option/s/$separator$value/$separator$currentsetting/gi' $filename" "sudo mv $filename$BACKUPEXTENTION \$BACKUPFOLDER"
 						echo_text_function "$ModificationText Changing existing entry - $option$separator$value in $filename" "CHANGED"
 					else #Check if the current setting is blank
-						if [[ "$LineToAddAfter" = "" ]]; then #Check if there is a line to add the option after 
+						if [[ "$LineNumberToAddAfter" = "" ]]; then #Check if there is a line to add the option after 
 							#Append the Option and Value to the conf file with the correct separator
 							execute_command_function "sudo sed -i$BACKUPEXTENTION '\$a$option$separator$value' $filename" "sudo sed -i '/^$option$separator$value/d' $filename" "sudo mv $filename$BACKUPEXTENTION \$BACKUPFOLDER"
 							echo_text_function "$ModificationText Adding new entry - $option$separator$value to $filename at the end of the file" "CHANGED"
 						else #Check if there is a line to add the option after 
 							#Insert the Option and Value to the conf file with the correct separator at the correct location
-							execute_command_function "sudo sed -i$BACKUPEXTENTION '"$LineToAddAfter"i $option$separator$value' $filename" "sudo sed -i '/^$option$separator$value/d' $filename" "sudo mv $filename$BACKUPEXTENTION \$BACKUPFOLDER"
-							echo_text_function "$ModificationText Adding new entry - $option$separator$value to $filename at line number $LineToAddAfter" "CHANGED"
+							execute_command_function "sudo sed -i$BACKUPEXTENTION '"$LineNumberToAddAfter"i $option$separator$value' $filename" "sudo sed -i '/^$option$separator$value/d' $filename" "sudo mv $filename$BACKUPEXTENTION \$BACKUPFOLDER"
+							echo_text_function "$ModificationText Adding new entry - $option$separator$value to $filename at line number $LineNumberToAddAfter" "CHANGED"
 						fi  #Check if there is a line to add the option after 
 					fi #Check if the current setting is blank
 					
@@ -531,11 +531,11 @@ for i in "${Conf_LOOP[@]}"; do
 				#There is no required line to check for
 				echo_text_function "$CorrectText $option has correct value of $value in $filename" "ON"
 			else #Check if there is a required line to add after 
-				if [[ "$LineToAddAfter" -eq "" ]]; then #Check if the required line to add after exists 
+				if [[ "$LineNumberToAddAfter" -eq "" ]]; then #Check if the required line to add after exists 
 					#The required line that this option should follow does not exist
 			        echo_text_function "$WarningText $option has correct value of $value in $filename but the required previous line of $textoflinetoaddafter is not present" "WARNING"	
 				else #Check if the required line to add after exists 
-					if [[ "$LineToAddAfter" -eq "$linenumofcurrentsetting" ]]; then #Check if existing line correctly follows the required line
+					if [[ "$LineNumberToAddAfter" -eq "$linenumofcurrentsetting" ]]; then #Check if existing line correctly follows the required line
 				        echo_text_function "$CorrectText $option has correct value of $value in $filename and follows the corret line of $textoflinetoaddafter" "ON"
 					else #Check if existing line correctly follows the required line
 				        echo_text_function "$WarningText $option has correct value of $value in $filename but does not follow the correct line of $textoflinetoaddafter" "WARNING"
@@ -549,57 +549,56 @@ for i in "${Conf_LOOP[@]}"; do
 done
 
 #Service Check
-#Format
-#servicename,should it be on or off (uninstalled will also suffice),reason (for now the default reason is "security", I should make then more descriptive)
 services_to_check=(
-"abrtd,off,security"
-"acpid,off,security"
-"atd,off,security"
-"autofs,off,V-38437"
-"avahi-daemon,off,security"
-"avahi-dnsconfd,off,security"
-"bluetooth,off,security"
-"cpuspeed,off,security"
-"cups anacron,off,security"
-"firstboot,off,security"
-"gpm,off,security"
-"haldeamon,off,security"
-"hiddi,off,security"
-"ip6tables,off,security"
-"kudzu,off,security"
-"mcstrans,off,security"
-"mdmonitor,off,security"
-"messagebus,off,security"
-"netconsole,off,security"
-"ntpdate,off,security"
-"ntpd,off,security"
-"oddjobd,off,security"
-"pcscd,off,security"
-"qpidd,off,security"
-"rawdevices,off,security"
-"rdisc,off,security"
-"readahead_early,off,security"
-"readahead_later,off,security"
-"restorecond,off,security"
-"rexecd,off,security"
-"rhnsd,on,configuration"
-"rlogind,off,security"
-"rshd,off,security"
-"smartd,off,security"
-"telnet,off,security"
-"tftp,off,security"
-"vsftpd,off,security"
-"ypbind,off,security"
-"yum-updatesd,off,security"
-"crond,on,security"
-"iptables,on,security"
-"webmin,off,security"
+'{ "servicename": "abrtd",           "preferredstatus": "off", "reason": "security"  }'
+'{ "servicename": "acpid",           "preferredstatus": "off", "reason": "security"  }'
+'{ "servicename": "atd",             "preferredstatus": "off", "reason": "security"  }'
+'{ "servicename": "autofs",          "preferredstatus": "off", "reason": "V-38437"  }'
+'{ "servicename": "avahi-daemon",    "preferredstatus": "off", "reason": "security"  }'
+'{ "servicename": "avahi-dnsconfd",  "preferredstatus": "off", "reason": "security"  }'
+'{ "servicename": "bluetooth",       "preferredstatus": "off", "reason": "security"  }'
+'{ "servicename": "cpuspeed",        "preferredstatus": "off", "reason": "security"  }'
+'{ "servicename": "cups",            "preferredstatus": "off", "reason": "security"  }'
+'{ "servicename": "firstboot",       "preferredstatus": "off", "reason": "security"  }'
+'{ "servicename": "gpm",             "preferredstatus": "off", "reason": "security"  }'
+'{ "servicename": "haldeamon",       "preferredstatus": "off", "reason": "security"  }'
+'{ "servicename": "hiddi",           "preferredstatus": "off", "reason": "security"  }'
+'{ "servicename": "ip6tables",       "preferredstatus": "off", "reason": "security"  }'
+'{ "servicename": "kudzu",           "preferredstatus": "off", "reason": "security"  }'
+'{ "servicename": "mcstrans",        "preferredstatus": "off", "reason": "security"  }'
+'{ "servicename": "mdmonitor",       "preferredstatus": "off", "reason": "security"  }'
+'{ "servicename": "messagebus",      "preferredstatus": "off", "reason": "security"  }'
+'{ "servicename": "netconsole",      "preferredstatus": "off", "reason": "security"  }'
+'{ "servicename": "ntpdate",         "preferredstatus": "off", "reason": "security"  }'
+'{ "servicename": "ntpd",            "preferredstatus": "off", "reason": "security"  }'
+'{ "servicename": "oddjobd",         "preferredstatus": "off", "reason": "security"  }'
+'{ "servicename": "pcscd",           "preferredstatus": "off", "reason": "security"  }'
+'{ "servicename": "qpidd",           "preferredstatus": "off", "reason": "security"  }'
+'{ "servicename": "rawdevices",      "preferredstatus": "off", "reason": "security"  }'
+'{ "servicename": "rdisc",           "preferredstatus": "off", "reason": "security"  }'
+'{ "servicename": "readahead_early", "preferredstatus": "off", "reason": "security"  }'
+'{ "servicename": "readahead_later", "preferredstatus": "off", "reason": "security"  }'
+'{ "servicename": "restorecond",     "preferredstatus": "off", "reason": "security"  }'
+'{ "servicename": "rexecd",          "preferredstatus": "off", "reason": "security"  }'
+'{ "servicename": "rhnsd",           "preferredstatus": "on",  "reason": "security"  }'
+'{ "servicename": "rlogind",         "preferredstatus": "off", "reason": "security"  }'
+'{ "servicename": "rshd",            "preferredstatus": "off", "reason": "security"  }'
+'{ "servicename": "smartd",          "preferredstatus": "off", "reason": "security"  }'
+'{ "servicename": "telnet",          "preferredstatus": "off", "reason": "security"  }'
+'{ "servicename": "tftp",            "preferredstatus": "off", "reason": "security"  }'
+'{ "servicename": "vsftpd",          "preferredstatus": "off", "reason": "security"  }'
+'{ "servicename": "ypbind",          "preferredstatus": "off", "reason": "security"  }'
+'{ "servicename": "yum-updatesd",    "preferredstatus": "off", "reason": "security"  }'
+'{ "servicename": "crond",           "preferredstatus": "on",  "reason": "security"  }'
+'{ "servicename": "iptables",        "preferredstatus": "on",  "reason": "security"  }'
+'{ "servicename": "webmin",          "preferredstatus": "off", "reason": "security"  }'
 )
 
 for i in "${services_to_check[@]}"; do
-	servicename=$(echo "$i" | awk -F, '{print $1;}')
-	correct_setting=$(echo "$i" | awk -F, '{print $2;}')
-	reason=$(echo "$i" | awk -F, '{print $3;}')
+        servicename=$(echo "$i" | grep -Po '(?<="servicename": ")[^"]*') 
+        correct_setting=$(echo "$i" | grep -Po '(?<="preferredstatus": ")[^"]*') 
+        reason=$(echo "$i" | grep -Po '(?<="reason": ")[^"]*') 
+
 	
 	if sudo /sbin/chkconfig --list "$servicename" > /dev/null 2>&1; then #does the service exist check
 		#If the service exists then we need to get its current start-up setting- Note we are only checking run level 3
