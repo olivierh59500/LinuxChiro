@@ -18,7 +18,7 @@ What it checks/fixes:
  Requirements:
 - Runs on RHEL/Centos 5/6 (could easily work on many others, the big difference between versions is the actual checks to perform)
 - Sudo privs without password (This can be trimmed down) 
-- Commnads: echo chmod chown grep sed service stat rpm yum awk tail sysctl mktemp tar sudo mv date
+- Commnads: echo chmod chown grep sed service stat rpm yum printf awk tail sysctl mktemp tar sudo mv date
 - GNU bash, version 3.2.25 or later
 
  Usage and Example:
