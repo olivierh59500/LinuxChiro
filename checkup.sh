@@ -297,7 +297,7 @@ file_and_perm_array=(
 '{ "Operation": "chmod", "Filename": "/usr/lib64",                  "Correct_Value": "755",       "Reason": "secure__usr_lib64" }'
 '{ "Operation": "chmod", "Filename": "/var/log/audit",              "Correct_Value": "750",       "Reason": "secure_audit_dir" }'
 '{ "Operation": "chmod", "Filename": "/var/log/audit/audit.log",    "Correct_Value": "600",       "Reason": "secure_audit_log" }'
-'{ "Operation": "chown", "Filename": "var/spool/cron/root",         "Correct_Value": "root:root", "Reason": "secure_root_crontab" }'
+'{ "Operation": "chown", "Filename": "/var/spool/cron/root",         "Correct_Value": "root:root", "Reason": "secure_root_crontab" }'
 '{ "Operation": "chown", "Filename": "/var/log/btmp",               "Correct_Value": "root:root", "Reason": "secure_logs" }'
 '{ "Operation": "chown", "Filename": "/etc/cups/cupsd.conf",        "Correct_Value": "lp:sys", "   Reason": "secure_cups_conf" }'
 '{ "Operation": "chown", "Filename": "/etc/pam.d/atd",              "Correct_Value": "root:root", "Reason": "secure_pam_conf" }'
@@ -352,39 +352,26 @@ for i in "${file_and_perm_array[@]}"; do
 done
 
 
-sysctlfile="/etc/sysctl.conf"
-ssh_client_config="/etc/ssh/ssh_config"
-sshd_config="/etc/ssh/sshd_config"
-etc_resolv_conf="/etc/resolv.conf"
-sshd_service="sshd"
-logins_defs="/etc/login.defs"
-sysconfig_init="/etc/sysconfig/init"
-httpd_conf="/etc/httpd/conf/httpd.conf"
-ssl_conf="/etc/httpd/conf.d/ssl.conf"
-php_conf="/etc/php.ini"
-rpmpkgslog_conf="/etc/logrotate.d/rpm"
-network_conf="/etc/sysconfig/network"
-
 #Configure Options and Values in files
 Conf_LOOP=(
-'{ "Filename": "/etc/sysctl.conf",     "Option": "net.ipv4.tcp_max_syn_backlog",                "Value": "4096",   "Separator": "=",   "Command_To_Set_Active_Value": "sysctl",  "Flag_To_Set_Active_Value": "-w",   "Service_To_Reload": "none",  "Line_To_Add_After": "none",  "Reason": "sysctl_tuning" }'
-'{ "Filename": "/etc/sysctl.conf",     "Option": "net.ipv4.conf.all.rp_filter",                 "Value": "1",      "Separator": "=",   "Command_To_Set_Active_Value": "sysctl",  "Flag_To_Set_Active_Value": "-w",   "Service_To_Reload": "none",  "Line_To_Add_After": "none",  "Reason": "sysctl_tuning" }'
-'{ "Filename": "/etc/sysctl.conf",     "Option": "net.ipv4.conf.all.accept_source_route",       "Value": "0",      "Separator": "=",   "Command_To_Set_Active_Value": "sysctl",  "Flag_To_Set_Active_Value": "-w",   "Service_To_Reload": "none",  "Line_To_Add_After": "none",  "Reason": "sysctl_tuning" }'
-'{ "Filename": "/etc/sysctl.conf",     "Option": "net.ipv4.conf.all.accept_redirects",          "Value": "0",      "Separator": "=",   "Command_To_Set_Active_Value": "sysctl",  "Flag_To_Set_Active_Value": "-w",   "Service_To_Reload": "none",  "Line_To_Add_After": "none",  "Reason": "sysctl_tuning" }'
-'{ "Filename": "/etc/sysctl.conf",     "Option": "net.ipv4.conf.all.secure_redirects",          "Value": "0",      "Separator": "=",   "Command_To_Set_Active_Value": "sysctl",  "Flag_To_Set_Active_Value": "-w",   "Service_To_Reload": "none",  "Line_To_Add_After": "none",  "Reason": "sysctl_tuning" }'
-'{ "Filename": "/etc/sysctl.conf",     "Option": "net.ipv4.conf.default.accept_redirects",      "Value": "0",      "Separator": "=",   "Command_To_Set_Active_Value": "sysctl",  "Flag_To_Set_Active_Value": "-w",   "Service_To_Reload": "none",  "Line_To_Add_After": "none",  "Reason": "sysctl_tuning" }'
-'{ "Filename": "/etc/sysctl.conf",     "Option": "net.ipv4.conf.default.secure_redirects",      "Value": "0",      "Separator": "=",   "Command_To_Set_Active_Value": "sysctl",  "Flag_To_Set_Active_Value": "-w",   "Service_To_Reload": "none",  "Line_To_Add_After": "none",  "Reason": "sysctl_tuning" }'
-'{ "Filename": "/etc/sysctl.conf",     "Option": "net.ipv4.conf.all.send_redirects",            "Value": "0",      "Separator": "=",   "Command_To_Set_Active_Value": "sysctl",  "Flag_To_Set_Active_Value": "-w",   "Service_To_Reload": "none",  "Line_To_Add_After": "none",  "Reason": "sysctl_tuning" }'
-'{ "Filename": "/etc/sysctl.conf",     "Option": "net.ipv4.conf.default.send_redirects",        "Value": "0",      "Separator": "=",   "Command_To_Set_Active_Value": "sysctl",  "Flag_To_Set_Active_Value": "-w",   "Service_To_Reload": "none",  "Line_To_Add_After": "none",  "Reason": "sysctl_tuning" }'
-'{ "Filename": "/etc/sysctl.conf",     "Option": "net.ipv4.tcp_syncookies",                     "Value": "1",      "Separator": "=",   "Command_To_Set_Active_Value": "sysctl",  "Flag_To_Set_Active_Value": "-w",   "Service_To_Reload": "none",  "Line_To_Add_After": "none",  "Reason": "sysctl_tuning" }'
-'{ "Filename": "/etc/sysctl.conf",     "Option": "net.ipv4.icmp_echo_ignore_broadcasts",        "Value": "1",      "Separator": "=",   "Command_To_Set_Active_Value": "sysctl",  "Flag_To_Set_Active_Value": "-w",   "Service_To_Reload": "none",  "Line_To_Add_After": "none",  "Reason": "sysctl_tuning" }'
-'{ "Filename": "/etc/sysctl.conf",     "Option": "net.ipv4.icmp_ignore_bogus_error_responses",  "Value": "1",      "Separator": "=",   "Command_To_Set_Active_Value": "sysctl",  "Flag_To_Set_Active_Value": "-w",   "Service_To_Reload": "none",  "Line_To_Add_After": "none",  "Reason": "sysctl_tuning" }'
-'{ "Filename": "/etc/sysctl.conf",     "Option": "net.ipv4.ip_forward",                         "Value": "0",      "Separator": "=",   "Command_To_Set_Active_Value": "sysctl",  "Flag_To_Set_Active_Value": "-w",   "Service_To_Reload": "none",  "Line_To_Add_After": "none",  "Reason": "sysctl_tuning" }'
-'{ "Filename": "/etc/sysctl.conf",     "Option": "net.ipv4.conf.all.log_martians",              "Value": "1",      "Separator": "=",   "Command_To_Set_Active_Value": "sysctl",  "Flag_To_Set_Active_Value": "-w",   "Service_To_Reload": "none",  "Line_To_Add_After": "none",  "Reason": "sysctl_tuning" }'
-'{ "Filename": "/etc/sysctl.conf",     "Option": "net.ipv4.conf.default.rp_filter",             "Value": "1",      "Separator": "=",   "Command_To_Set_Active_Value": "sysctl",  "Flag_To_Set_Active_Value": "-w",   "Service_To_Reload": "none",  "Line_To_Add_After": "none",  "Reason": "sysctl_tuning" }'
-'{ "Filename": "/etc/sysctl.conf",     "Option": "vm.swappiness",                               "Value": "1",      "Separator": "=",   "Command_To_Set_Active_Value": "sysctl",  "Flag_To_Set_Active_Value": "-w",   "Service_To_Reload": "none",  "Line_To_Add_After": "none",  "Reason": "sysctl_tuning" }'
-'{ "Filename": "/etc/sysctl.conf",     "Option": "kernel.randomize_va_space",                   "Value": "2",      "Separator": "=",   "Command_To_Set_Active_Value": "sysctl",  "Flag_To_Set_Active_Value": "-w",   "Service_To_Reload": "none",  "Line_To_Add_After": "none",  "Reason": "sysctl_tuning" }'
-'{ "Filename": "/etc/sysctl.conf",     "Option": "kernel.exec-shield",                          "Value": "1",      "Separator": "=",   "Command_To_Set_Active_Value": "sysctl",  "Flag_To_Set_Active_Value": "-w",   "Service_To_Reload": "none",  "Line_To_Add_After": "none",  "Reason": "sysctl_tuning" }'
+'{ "Filename": "/etc/sysctl.conf",     "Option": "net.ipv4.tcp_max_syn_backlog",                "Value": "4096",   "Separator": " = ",   "Command_To_Set_Active_Value": "sysctl",  "Flag_To_Set_Active_Value": "-w",   "Service_To_Reload": "none",  "Line_To_Add_After": "none",  "Reason": "sysctl_tuning" }'
+'{ "Filename": "/etc/sysctl.conf",     "Option": "net.ipv4.conf.all.rp_filter",                 "Value": "1",      "Separator": " = ",   "Command_To_Set_Active_Value": "sysctl",  "Flag_To_Set_Active_Value": "-w",   "Service_To_Reload": "none",  "Line_To_Add_After": "none",  "Reason": "sysctl_tuning" }'
+'{ "Filename": "/etc/sysctl.conf",     "Option": "net.ipv4.conf.all.accept_source_route",       "Value": "0",      "Separator": " = ",   "Command_To_Set_Active_Value": "sysctl",  "Flag_To_Set_Active_Value": "-w",   "Service_To_Reload": "none",  "Line_To_Add_After": "none",  "Reason": "sysctl_tuning" }'
+'{ "Filename": "/etc/sysctl.conf",     "Option": "net.ipv4.conf.all.accept_redirects",          "Value": "0",      "Separator": " = ",   "Command_To_Set_Active_Value": "sysctl",  "Flag_To_Set_Active_Value": "-w",   "Service_To_Reload": "none",  "Line_To_Add_After": "none",  "Reason": "sysctl_tuning" }'
+'{ "Filename": "/etc/sysctl.conf",     "Option": "net.ipv4.conf.all.secure_redirects",          "Value": "0",      "Separator": " = ",   "Command_To_Set_Active_Value": "sysctl",  "Flag_To_Set_Active_Value": "-w",   "Service_To_Reload": "none",  "Line_To_Add_After": "none",  "Reason": "sysctl_tuning" }'
+'{ "Filename": "/etc/sysctl.conf",     "Option": "net.ipv4.conf.default.accept_redirects",      "Value": "0",      "Separator": " = ",   "Command_To_Set_Active_Value": "sysctl",  "Flag_To_Set_Active_Value": "-w",   "Service_To_Reload": "none",  "Line_To_Add_After": "none",  "Reason": "sysctl_tuning" }'
+'{ "Filename": "/etc/sysctl.conf",     "Option": "net.ipv4.conf.default.secure_redirects",      "Value": "0",      "Separator": " = ",   "Command_To_Set_Active_Value": "sysctl",  "Flag_To_Set_Active_Value": "-w",   "Service_To_Reload": "none",  "Line_To_Add_After": "none",  "Reason": "sysctl_tuning" }'
+'{ "Filename": "/etc/sysctl.conf",     "Option": "net.ipv4.conf.all.send_redirects",            "Value": "0",      "Separator": " = ",   "Command_To_Set_Active_Value": "sysctl",  "Flag_To_Set_Active_Value": "-w",   "Service_To_Reload": "none",  "Line_To_Add_After": "none",  "Reason": "sysctl_tuning" }'
+'{ "Filename": "/etc/sysctl.conf",     "Option": "net.ipv4.conf.default.send_redirects",        "Value": "0",      "Separator": " = ",   "Command_To_Set_Active_Value": "sysctl",  "Flag_To_Set_Active_Value": "-w",   "Service_To_Reload": "none",  "Line_To_Add_After": "none",  "Reason": "sysctl_tuning" }'
+'{ "Filename": "/etc/sysctl.conf",     "Option": "net.ipv4.tcp_syncookies",                     "Value": "1",      "Separator": " = ",   "Command_To_Set_Active_Value": "sysctl",  "Flag_To_Set_Active_Value": "-w",   "Service_To_Reload": "none",  "Line_To_Add_After": "none",  "Reason": "sysctl_tuning" }'
+'{ "Filename": "/etc/sysctl.conf",     "Option": "net.ipv4.icmp_echo_ignore_broadcasts",        "Value": "1",      "Separator": " = ",   "Command_To_Set_Active_Value": "sysctl",  "Flag_To_Set_Active_Value": "-w",   "Service_To_Reload": "none",  "Line_To_Add_After": "none",  "Reason": "sysctl_tuning" }'
+'{ "Filename": "/etc/sysctl.conf",     "Option": "net.ipv4.icmp_ignore_bogus_error_responses",  "Value": "1",      "Separator": " = ",   "Command_To_Set_Active_Value": "sysctl",  "Flag_To_Set_Active_Value": "-w",   "Service_To_Reload": "none",  "Line_To_Add_After": "none",  "Reason": "sysctl_tuning" }'
+'{ "Filename": "/etc/sysctl.conf",     "Option": "net.ipv4.ip_forward",                         "Value": "0",      "Separator": " = ",   "Command_To_Set_Active_Value": "sysctl",  "Flag_To_Set_Active_Value": "-w",   "Service_To_Reload": "none",  "Line_To_Add_After": "none",  "Reason": "sysctl_tuning" }'
+'{ "Filename": "/etc/sysctl.conf",     "Option": "net.ipv4.conf.all.log_martians",              "Value": "1",      "Separator": " = ",   "Command_To_Set_Active_Value": "sysctl",  "Flag_To_Set_Active_Value": "-w",   "Service_To_Reload": "none",  "Line_To_Add_After": "none",  "Reason": "sysctl_tuning" }'
+'{ "Filename": "/etc/sysctl.conf",     "Option": "net.ipv4.conf.default.rp_filter",             "Value": "1",      "Separator": " = ",   "Command_To_Set_Active_Value": "sysctl",  "Flag_To_Set_Active_Value": "-w",   "Service_To_Reload": "none",  "Line_To_Add_After": "none",  "Reason": "sysctl_tuning" }'
+'{ "Filename": "/etc/sysctl.conf",     "Option": "vm.swappiness",                               "Value": "1",      "Separator": " = ",   "Command_To_Set_Active_Value": "sysctl",  "Flag_To_Set_Active_Value": "-w",   "Service_To_Reload": "none",  "Line_To_Add_After": "none",  "Reason": "sysctl_tuning" }'
+'{ "Filename": "/etc/sysctl.conf",     "Option": "kernel.randomize_va_space",                   "Value": "2",      "Separator": " = ",   "Command_To_Set_Active_Value": "sysctl",  "Flag_To_Set_Active_Value": "-w",   "Service_To_Reload": "none",  "Line_To_Add_After": "none",  "Reason": "sysctl_tuning" }'
+'{ "Filename": "/etc/sysctl.conf",     "Option": "kernel.exec-shield",                          "Value": "1",      "Separator": " = ",   "Command_To_Set_Active_Value": "sysctl",  "Flag_To_Set_Active_Value": "-w",   "Service_To_Reload": "none",  "Line_To_Add_After": "none",  "Reason": "sysctl_tuning" }'
 '{ "Filename": "/etc/ssh/ssh_config",  "Option": "HashKnownHosts",                              "Value": "yes",    "Separator": " ",   "Command_To_Set_Active_Value": "none",    "Flag_To_Set_Active_Value": "none", "Service_To_Reload": "none",  "Line_To_Add_After": "none",  "Reason": "ssh_client_tuning" }'
 '{ "Filename": "/etc/ssh/ssh_config",  "Option": "RhostsAuthentication",                        "Value": "no",     "Separator": " ",   "Command_To_Set_Active_Value": "none",    "Flag_To_Set_Active_Value": "none", "Service_To_Reload": "none",  "Line_To_Add_After": "none",  "Reason": "ssh_client_tuning" }'
 '{ "Filename": "/etc/ssh/ssh_config",  "Option": "HostbasedAuthentication",                     "Value": "no",     "Separator": " ",   "Command_To_Set_Active_Value": "none",    "Flag_To_Set_Active_Value": "none", "Service_To_Reload": "none",  "Line_To_Add_After": "none",  "Reason": "ssh_client_tuning" }'
@@ -411,18 +398,21 @@ Conf_LOOP=(
 '{ "Filename": "/etc/login.defs",  "Option": "PASS_MAX_DAYS",                                   "Value": "60",      "Separator": "\t",   "Command_To_Set_Active_Value": "none",    "Flag_To_Set_Active_Value": "none", "Service_To_Reload": "none",  "Line_To_Add_After": "none",  "Reason": "logins_defs_securing" }'
 '{ "Filename": "/etc/login.defs",  "Option": "PASS_WARN_AGE",                                   "Value": "7",       "Separator": "\t",   "Command_To_Set_Active_Value": "none",    "Flag_To_Set_Active_Value": "none", "Service_To_Reload": "none",  "Line_To_Add_After": "none",  "Reason": "logins_defs_securing" }'
 '{ "Filename": "/etc/login.defs",  "Option": "ENCRYPT_METHOD",                                  "Value": "SHA512",  "Separator": "\t",   "Command_To_Set_Active_Value": "none",    "Flag_To_Set_Active_Value": "none", "Service_To_Reload": "none",  "Line_To_Add_After": "none",  "Reason": "logins_defs_securing" }'
+'{ "Filename": "/etc/logrotate.d/rpm",  "Option": "create 0640",                                "Value": "root root",  "Separator": "\t",   "Command_To_Set_Active_Value": "none",    "Flag_To_Set_Active_Value": "none", "Service_To_Reload": "none",  "Line_To_Add_After": "none",  "Reason": "sysconfig_securing" }'
 '{ "Filename": "/etc/httpd/conf/httpd.conf",  "Option": "ServerSignature",                      "Value": "Off",      "Separator": " ",   "Command_To_Set_Active_Value": "none",    "Flag_To_Set_Active_Value": "none", "Service_To_Reload": "httpd",  "Line_To_Add_After": "none",  "Reason": "httpd_securing" }'
 '{ "Filename": "/etc/httpd/conf/httpd.conf",  "Option": "ServerTokens",                         "Value": "Prod",      "Separator": " ",   "Command_To_Set_Active_Value": "none",    "Flag_To_Set_Active_Value": "none", "Service_To_Reload": "httpd",  "Line_To_Add_After": "none",  "Reason": "httpd_securing" }'
 '{ "Filename": "/etc/httpd/conf/httpd.conf",  "Option": "TraceEnable",                          "Value": "Off",      "Separator": " ",   "Command_To_Set_Active_Value": "none",    "Flag_To_Set_Active_Value": "none", "Service_To_Reload": "httpd",  "Line_To_Add_After": "none",  "Reason": "httpd_securing" }'
 '{ "Filename": "/etc/httpd/conf/httpd.conf",  "Option": "Header always append",                 "Value": "SAMEORIGIN",      "Separator": " X-Frame-Options ",   "Command_To_Set_Active_Value": "none",    "Flag_To_Set_Active_Value": "none", "Service_To_Reload": "httpd",  "Line_To_Add_After": "none",  "Reason": "click_jacking_protection" }'
 '{ "Filename": "/etc/httpd/conf.d/ssl.conf",  "Option": "SSLProtocol",                          "Value": "all -SSLv2 -SSLv3",      "Separator": " ",   "Command_To_Set_Active_Value": "none",    "Flag_To_Set_Active_Value": "none", "Service_To_Reload": "httpd",  "Line_To_Add_After": "none",  "Reason": "ssl_secure_protocols" }'
+'{ "Filename": "/etc/httpd/conf.d/ssl.conf",  "Option": "Header always add",                       "Value": "\"max-age=15768000\"",       "Separator": " Strict-Transport-Security ",   "Command_To_Set_Active_Value": "none",    "Flag_To_Set_Active_Value": "none", "Service_To_Reload": "httpd",  "Line_To_Add_After": "^SSLHonorCipherOrder",  "Reason": "ssl_cipher_order_enforcement" }'
+'{ "Filename": "/etc/httpd/conf.d/ssl.conf",  "Option": "SSLHonorCipherOrder",                     "Value": "on",                         "Separator": " ",                             "Command_To_Set_Active_Value": "none",    "Flag_To_Set_Active_Value": "none", "Service_To_Reload": "httpd",  "Line_To_Add_After": "^SSLCipherSuite",  "Reason": "ssl_obey_server_ciphers" }'
+'{ "Filename": "/etc/httpd/conf.d/ssl.conf",  "Option": "SSLCipherSuite",                          "Value": "HIGH:!aNULL:!MD5:!EXP",      "Separator": " ",   "Command_To_Set_Active_Value": "none",    "Flag_To_Set_Active_Value": "none", "Service_To_Reload": "httpd",  "Line_To_Add_After": "^SSLProtocol",  "Reason": "ssl_secure_ciphers" }'
 '{ "Filename": "/etc/sysconfig/network",  "Option": "NOZEROCONF",                          "Value": "yes",      "Separator": "=",   "Command_To_Set_Active_Value": "none",    "Flag_To_Set_Active_Value": "none", "Service_To_Reload": "network",  "Line_To_Add_After": "none",  "Reason": "disabling_zeroconf" }'
 '{ "Filename": "/etc/php.ini",  "Option": "expose_php",                          "Value": "off",      "Separator": " = ",   "Command_To_Set_Active_Value": "none",    "Flag_To_Set_Active_Value": "none", "Service_To_Reload": "none",  "Line_To_Add_After": "none",  "Reason": "php_securing" }'
 '{ "Filename": "/etc/php.ini",  "Option": "enable_dl",                           "Value": "Off",      "Separator": " = ",   "Command_To_Set_Active_Value": "none",    "Flag_To_Set_Active_Value": "none", "Service_To_Reload": "none",  "Line_To_Add_After": "none",  "Reason": "php_securing" }'
 '{ "Filename": "/etc/php.ini",  "Option": "allow_url_fopen",                     "Value": "Off",      "Separator": " = ",   "Command_To_Set_Active_Value": "none",    "Flag_To_Set_Active_Value": "none", "Service_To_Reload": "none",  "Line_To_Add_After": "none",  "Reason": "php_securing" }'
 '{ "Filename": "/etc/php.ini",  "Option": "allow_url_include",                   "Value": "Off",      "Separator": " = ",   "Command_To_Set_Active_Value": "none",    "Flag_To_Set_Active_Value": "none", "Service_To_Reload": "none",  "Line_To_Add_After": "none",  "Reason": "php_securing" }'
 '{ "Filename": "/etc/sysconfig/init",  "Option": "PROMPT",                   "Value": "no",      "Separator": "=",   "Command_To_Set_Active_Value": "none",    "Flag_To_Set_Active_Value": "none", "Service_To_Reload": "none",  "Line_To_Add_After": "none",  "Reason": "sysconfig_securing" }'
-'{ "Filename": "/etc/logrotate.d/rpm",  "Option": "create 0640",                   "Value": "root root",      "Separator": "\t",   "Command_To_Set_Active_Value": "none",    "Flag_To_Set_Active_Value": "none", "Service_To_Reload": "none",  "Line_To_Add_After": "none",  "Reason": "sysconfig_securing" }'
 )
 
 #TODO - check for duplicate entries of the same option (especially with different values)
@@ -478,7 +468,7 @@ for i in "${Conf_LOOP[@]}"; do
 			if [[ "$MAKECHANGES" -eq "$Yes" ]]; then #Make Changes        
 				if [[ "$REQUIREDLINENOTFOUND" -eq "$Yes" ]]; then #Check to see if there was a required placement line and if it existed 
 					MAKETHISCHANGE=$No
-					echo_text_function "$WarningText We can not add $option to $filename becuase the required line of $textoflinetoaddafter does not exist" "WARNING"
+					echo_text_function "$WarningText We can not fix $option in $filename becuase the required line of $textoflinetoaddafter does not exist" "WARNING"
 					#We should set a flag to indicate that the script may need to rerun - the required line might be added with a later check
 					MAYNEEDTOBERERUN=$Yes
 				else #Check to see if there was a required placement line and if it existed
@@ -494,9 +484,14 @@ for i in "${Conf_LOOP[@]}"; do
 					fi ##Are Backsups turned off 
 					
 					if [[ "$currentsetting" != "" ]]; then #Check if the current setting is blank
-						#Correct the existing value for the option - We currently don't attempt to move an existing value if it doesn't follow a required line. We will warn for this case though. 
+						#Correct the existing value for the option - We currently don't attempt to move an existing value if it doesn't follow a required line.  
 						execute_command_function "sudo sed -i$BACKUPEXTENTION '/^$option/s/$separator$currentsetting/$separator$value/gi' $filename" "sudo sed -i '/^$option/s/$separator$value/$separator$currentsetting/gi' $filename" "sudo mv $filename$BACKUPEXTENTION \$BACKUPFOLDER"
 						echo_text_function "$ModificationText Changing existing entry - $option$separator$value in $filename" "CHANGED"
+						if [[ "$LineNumberToAddAfter" != "" ]]; then #Check if there is a line to add the option after
+							#We need to check if the existing option is in the right place 
+							LineNumberOfExistingOption=$(sudo grep -n "^$option" "$filename" | tail -n1 | grep -o '^[0-9]*')		
+							
+						fi #Check if there is a line to add the option after
 					else #Check if the current setting is blank
 						if [[ "$LineNumberToAddAfter" = "" ]]; then #Check if there is a line to add the option after 
 							#Append the Option and Value to the conf file with the correct separator
