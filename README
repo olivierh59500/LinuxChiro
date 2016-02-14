@@ -178,4 +178,4 @@ Notes and current limitations (some are by design):
 - It can't deal with min/max values. It only takes exact - ex if PASS_MAX_DAYS is set to 60 in /etc/login.defs, it will warn if checking for 50 
 - It will not install a service or rpm that should be present but isn't. It will warn. 
 - If the prerequite config (for positioning) does not exist, it will not add the option/value pair immeditately (it may add it on a rerun)
-- It will not reposition an existing option/value pair. It will warn. Hopefully in the future we can reposition in the near future (thats what Chiros do!)
+- It will not reposition an existing option/value pair. It will warn. Hopefully in the near future we can reposition (thats what Chiros do!)
