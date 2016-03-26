@@ -14,9 +14,10 @@ What it checks/fixes:
  - Config files for correct option/value settings 
    - Ex: "PermitEmptyPasswords no" in sshd_config or "net.ipv4.tcp_syncookies = 1" in /etc/sysctl.conf
  - Service checks (Running and Startup Configs) 
+ - Coming Soon (Package Checks) 
  
  Requirements:
-- Runs on RHEL/Centos 5/6 (could easily work on many others, the big difference between versions is the actual checks to perform)
+- Runs on RHEL/Centos 5/6/7 and AWS Linux (could easily work on many others, the big difference between versions is the actual checks to perform)
 - Sudo privs without password (This can be trimmed down) 
 - Commnads: echo chmod chown grep sed service stat rpm yum awk tail sysctl mktemp tar sudo mv date
 - GNU bash, version 3.2.25 or later
