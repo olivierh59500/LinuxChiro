@@ -114,7 +114,8 @@ if [[ -f /etc/redhat-release ]]; then #Determine version of RedHat/Centos and if
 	fi #End OS Version determination check 
 else #else for main OS check
 	echo_text_function "$ErrorText You are using an unsupported OS. RedHat/Centos required"
-	exit $UnsupportedOS
+	echo_text_function "$ErrorText We'll skip this for now"
+	#exit $UnsupportedOS
 fi #End OS Check 
 
 echo_text_function "OSVER is $OSVER - Supported"
